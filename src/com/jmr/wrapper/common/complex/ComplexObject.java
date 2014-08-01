@@ -8,6 +8,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.threads.ComplexUdpSendThread;
 
 /**
  * Networking Library
@@ -99,7 +100,7 @@ public class ComplexObject {
 	 */
 	public void sendUdp(DatagramSocket udpOut, InetAddress address, int port) {
 		for (ComplexPiece piece : pieces)
-			piece.sendUdp(udpOut, address, port);
+			neSocket.executeThread(new ComplexUdpSendThread(piece, udpOut, address, port));
 	}
 	
 	/** Copies part of one array to another.
