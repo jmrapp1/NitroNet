@@ -10,8 +10,10 @@ import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import com.jmr.wrapper.client.Client;
 import com.jmr.wrapper.common.complex.ComplexObject;
 import com.jmr.wrapper.server.ConnectionManager;
+import com.jmr.wrapperx.client.HttpConnection;
 
 /**
  * Networking Library
@@ -23,7 +25,7 @@ import com.jmr.wrapper.server.ConnectionManager;
  * @version 1.0 7/19/2014
  */
 
-public class Connection {
+public class Connection implements IConnection {
 
 	/** Counter used to set the id of connections. */
 	private static int counter = 0;
@@ -72,6 +74,8 @@ public class Connection {
 		id = ++counter;
 	}
 	
+	
+	
 	/** @return The address to the connection. */
 	public InetAddress getAddress() {
 		return address;
@@ -103,7 +107,7 @@ public class Connection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] data = getByteArray(byteOutStream, object);
+			byte[] data = ConnectionUtils.getByteArray(neSocket, byteOutStream, object);
 			DatagramPacket sendPacket = new DatagramPacket(data, data.length, address, port);
 			udpSocket.send(sendPacket);
 			objOut.flush();
@@ -116,52 +120,7 @@ public class Connection {
 		}
 	}
 	
-	/** Gets the byte array of the object, the checksum of the object, and combines them into
-	 * an array of bytes. The first 10 bytes are the checksum and the remaining bytes are the
-	 * object.
-	 * @param stream The object's byte stream to get the byte array. 
-	 * @param object The object being sent.
-	 * @return The byte array with the size of it being Config.PACKET_BUFFER_SIZE
-	 */
-	private byte[] getByteArray(ByteArrayOutputStream stream, Object object) {
-		byte[] array = stream.toByteArray();
-
-		byte[] checksumBytes = getChecksum(array);
-		
-		byte[] concat = new byte[neSocket.getConfig().PACKET_BUFFER_SIZE];
-		
-		System.arraycopy(checksumBytes, 0, concat, 0, checksumBytes.length);
-		System.arraycopy(array, 0, concat, checksumBytes.length, array.length);
-		
-		if (neSocket.getEncryptionMethod() != null) {
-			concat = neSocket.getEncryptionMethod().encrypt(concat);
-		}
-		
-		return concat;
-	}
 	
-	/** Gets the byte array of the object, the checksum of the object, and combines them into
-	 * an array of bytes. The first 10 bytes are the checksum and the remaining bytes are the
-	 * object.
-	 * @param stream The object's byte stream to get the byte array. 
-	 * @param object The object being sent.
-	 * @return The byte array with the size of it being the byte length of the object and checksum.
-	 */
-	private byte[] getCompressedByteArray(ByteArrayOutputStream stream, Object object) {
-		byte[] array = stream.toByteArray();
-		byte[] checksumBytes = getChecksum(array);
-		
-		byte[] concat = new byte[checksumBytes.length + array.length];
-		
-		System.arraycopy(checksumBytes, 0, concat, 0, checksumBytes.length);
-		System.arraycopy(array, 0, concat, checksumBytes.length, array.length);
-		
-		if (neSocket.getEncryptionMethod() != null) {
-			concat = neSocket.getEncryptionMethod().encrypt(concat);
-		}
-		
-		return concat;
-	}
 	
 	/** Sends an object over the TCP socket.
 	 * @param object The object to send.
@@ -172,7 +131,7 @@ public class Connection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] data = getByteArray(byteOutStream, object);
+			byte[] data = ConnectionUtils.getByteArray(neSocket, byteOutStream, object);
 			tcpOut.write(data);
 			tcpOut.flush();
 		} catch (IOException e) {
@@ -186,8 +145,8 @@ public class Connection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] checksum = getChecksum(byteOutStream.toByteArray());
-			byte[] data = getCompressedByteArray(byteOutStream, object);
+			byte[] checksum =  ConnectionUtils.getChecksum(byteOutStream.toByteArray());
+			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
 			new ComplexObject(data, checksum, neSocket).sendTcp(tcpOut);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -200,8 +159,8 @@ public class Connection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] checksum = getChecksum(byteOutStream.toByteArray());
-			byte[] data = getCompressedByteArray(byteOutStream, object);
+			byte[] checksum = ConnectionUtils.getChecksum(byteOutStream.toByteArray());
+			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
 			new ComplexObject(data, checksum, neSocket, splitAmount).sendTcp(tcpOut);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -214,8 +173,8 @@ public class Connection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] checksum = getChecksum(byteOutStream.toByteArray());
-			byte[] data = getCompressedByteArray(byteOutStream, object);
+			byte[] checksum = ConnectionUtils.getChecksum(byteOutStream.toByteArray());
+			byte[] data = ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
 			new ComplexObject(data, checksum, neSocket).sendUdp(udpSocket, address, port);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -228,25 +187,13 @@ public class Connection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] checksum = getChecksum(byteOutStream.toByteArray());
-			byte[] data = getCompressedByteArray(byteOutStream, object);
+			byte[] checksum = ConnectionUtils.getChecksum(byteOutStream.toByteArray());
+			byte[] data = ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
 			new ComplexObject(data, checksum, neSocket, splitAmount).sendUdp(udpSocket, address, port);
 		} catch (IOException e) {
 			e.printStackTrace();
 			ConnectionManager.getInstance().close(this);
 		}
-	}
-	
-	private byte[] getChecksum(byte[] array) {
-		Checksum checksum = new CRC32();
-		checksum.update(array, 0, array.length);
-		String val = String.valueOf(checksum.getValue());
-		
-		while (val.length() < 10) {
-			val += "0";
-		}
-		
-		return val.getBytes();
 	}
 	
 	/** Adds one to the amount of UDP packets lost. */

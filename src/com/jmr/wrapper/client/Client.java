@@ -1,6 +1,8 @@
 package com.jmr.wrapper.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -11,13 +13,15 @@ import java.util.concurrent.Executors;
 
 import com.jmr.wrapper.client.threads.ClientTcpReadThread;
 import com.jmr.wrapper.common.Connection;
-import com.jmr.wrapper.common.IListener;
+import com.jmr.wrapper.common.ConnectionUtils;
 import com.jmr.wrapper.common.NESocket;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
+import com.jmr.wrapper.common.listener.IListener;
 import com.jmr.wrapper.encryption.Encryptor;
 import com.jmr.wrapper.server.ConnectionManager;
 import com.jmr.wrapper.server.threads.UdpReadThread;
+import com.jmr.wrapperx.client.HttpConnection;
 
 /**
  * Networking Library
@@ -59,6 +63,9 @@ public class Client implements NESocket {
 	
 	/** The type of encryption to use when sending and receiving packets. */
 	private Encryptor encryptionMethod;
+
+	/** Connection to the HTTP Server if set. */
+	private HttpConnection httpConnection;
 	
 	/** Creates a new client sets the variables to be used to connect to a server later.
 	 * @param address The address to the server.
@@ -74,6 +81,14 @@ public class Client implements NESocket {
 		this.tcpPort = tcpPort;
 		this.udpPort = udpPort;
 		clientConfig = new ClientConfig();
+	}
+	
+	public Client() {
+		address = null;
+		clientConfig = new ClientConfig();
+		tcpPort = -1;
+		udpPort = -1;
+		mainExecutor = Executors.newCachedThreadPool();
 	}
 	
 	/** Connects to the server. */
@@ -101,6 +116,19 @@ public class Client implements NESocket {
 			sendTcp(new String("ConnectedToServer"));
 			sendUdp(new String("SettingUdpPort"));
 		}
+	}
+	
+	public void setHttpConnection(String url) {
+		httpConnection = new HttpConnection(this, url);
+	}
+	
+	
+	public HttpConnection getHttpConnection() {
+		return httpConnection;
+	}
+	
+	public void sendOverHttp(Object object) {
+		httpConnection.send(object);
 	}
 	
 	/** Sets the listener object.

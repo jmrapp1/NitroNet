@@ -8,11 +8,12 @@ import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.jmr.wrapper.common.IListener;
 import com.jmr.wrapper.common.NESocket;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
 import com.jmr.wrapper.common.exceptions.NECantStartServer;
+import com.jmr.wrapper.common.listener.SocketListener;
+import com.jmr.wrapper.common.listener.IListener;
 import com.jmr.wrapper.encryption.Encryptor;
 import com.jmr.wrapper.server.threads.TcpAcceptThread;
 import com.jmr.wrapper.server.threads.UdpReadThread;
@@ -44,7 +45,7 @@ public class Server implements NESocket {
 	private DatagramSocket udpSocket;
 	
 	/** The listener object. */
-	private IListener listener;
+	private SocketListener listener;
 	
 	/** The server configurations. */
 	private ServerConfig serverConfig;
@@ -82,7 +83,7 @@ public class Server implements NESocket {
 	 * @param listener The listener.
 	 */
 	public void setListener(IListener listener) {
-		this.listener = listener;
+		this.listener = (SocketListener) listener;
 	}
 	
 	@Override

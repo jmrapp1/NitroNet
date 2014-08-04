@@ -8,6 +8,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import com.jmr.wrapper.common.Connection;
+import com.jmr.wrapper.common.IConnection;
 import com.jmr.wrapper.common.NESocket;
 
 /**
@@ -23,7 +24,7 @@ import com.jmr.wrapper.common.NESocket;
 public class ReceivedComplexObject {
 
 	/** The connection it was sent from. */
-	private final Connection con;
+	private final IConnection con;
 	
 	/** An array of all of the received pieces. */
 	private final ReceivedComplexPiece[] pieces;
@@ -46,7 +47,7 @@ public class ReceivedComplexObject {
 	 * @param pieceSize The amount of pieces in the object.
 	 * @param neSocket Instance of the socket. 
 	 */
-	public ReceivedComplexObject(String checksum, Connection con, int pieceSize, NESocket neSocket) {
+	public ReceivedComplexObject(String checksum, IConnection con, int pieceSize, NESocket neSocket) {
 		this.checksum = checksum;
 		this.con = con;
 		this.pieceSize = pieceSize;
@@ -144,7 +145,7 @@ public class ReceivedComplexObject {
 	}
 	
 	/** @return The connection the object came from. */
-	public Connection getConnection() {
+	public IConnection getConnection() {
 		return con;
 	}
 	

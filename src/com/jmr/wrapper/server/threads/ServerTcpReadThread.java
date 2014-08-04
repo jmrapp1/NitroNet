@@ -9,6 +9,7 @@ import java.util.zip.Checksum;
 import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.complex.ReceivedComplexPiece;
+import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.server.ConnectionManager;
 import com.jmr.wrapper.server.Server;
 
@@ -97,7 +98,7 @@ public class ServerTcpReadThread implements Runnable {
 				}
 			}
 		} catch (NullPointerException | IOException | ClassNotFoundException e) { //disconnected
-			server.executeThread(new DisconnectedThread(server.getListener(), con));
+			server.executeThread(new DisconnectedThread((SocketListener)server.getListener(), con));
 			ConnectionManager.getInstance().close(con);
 			in = null;
 		}
@@ -170,6 +171,12 @@ public class ServerTcpReadThread implements Runnable {
 		return val;
 	}		
 
+	/** Copies an array to a new array with the given size and start index.
+	 * @param src The data being copied.
+	 * @param arraySize The size of the new array.
+	 * @param start The start index.
+	 * @return The new array of data.
+	 */
 	private byte[] copyArray(byte[] src, int arraySize, int start) {
 		byte[] ret = new byte[arraySize];
 		for (int i = 0; i < arraySize; i++)
@@ -177,6 +184,10 @@ public class ServerTcpReadThread implements Runnable {
 		return ret;
 	}
 	
+	/** Gets the ID from a complex object. 
+	 * @param data The data sent.
+	 * @return The complex object ID.
+	 */ 
 	private int getIdFromComplex(byte[] data) {
 		byte[] idArray = copyArray(data, 4, 1);
 		int size = findSizeOfObject(idArray);
@@ -185,6 +196,10 @@ public class ServerTcpReadThread implements Runnable {
 		return Integer.valueOf(id);
 	}
 	
+	/** Gets the amount of pieces in the complex object.
+	 * @param data The data sent.
+	 * @return The amount.
+	 */
 	private int getPieceAmountFromComplex(byte[] data) {
 		byte[] amountArray = copyArray(data, 4, 5);
 		int size = findSizeOfObject(amountArray);
@@ -193,8 +208,13 @@ public class ServerTcpReadThread implements Runnable {
 		return Integer.valueOf(pieceAmount);
 	}
 	
+	/** Gets the object from a complex piece.
+	 * @param data The data sent.
+	 * @return
+	 */
 	private byte[] getObjectFromComplex(byte[] data) {
 		return copyArray(data, data.length - 9, 9);
 	}
+	
 	
 }

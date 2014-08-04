@@ -1,7 +1,11 @@
 package com.jmr.wrapper.server.threads;
 
 import com.jmr.wrapper.common.Connection;
-import com.jmr.wrapper.common.IListener;
+import com.jmr.wrapper.common.IConnection;
+import com.jmr.wrapper.common.listener.SocketListener;
+import com.jmr.wrapper.common.listener.IListener;
+import com.jmr.wrapperx.common.HttpListener;
+import com.jmr.wrapperx.common.HttpSession;
 
 /**
  * Networking Library
@@ -18,7 +22,7 @@ public class ReceivedThread implements Runnable {
 	private final IListener listener;
 	
 	/** Instance of the connection. */
-	private final Connection con;
+	private final IConnection con;
 	
 	/** The object that was sent. */
 	private final Object object;
@@ -27,7 +31,7 @@ public class ReceivedThread implements Runnable {
 	 * @param listener Instance of the listener object.
 	 * @param con Instance of the connection.
 	 */
-	public ReceivedThread(IListener listener, Connection con, Object object) {
+	public ReceivedThread(IListener listener, IConnection con, Object object) {
 		this.listener = listener;
 		this.con = con;
 		this.object = object;
@@ -35,7 +39,10 @@ public class ReceivedThread implements Runnable {
 	
 	@Override
 	public void run() {
-		listener.received(con, object);
+		if (listener instanceof SocketListener)
+			((SocketListener)listener).received((Connection)con, object);
+		else if (listener instanceof HttpListener)
+			((HttpListener)listener).received((HttpSession)con, object);
 	}
 
 }

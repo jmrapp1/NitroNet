@@ -1,6 +1,7 @@
 package com.jmr.wrapper.server.threads;
 
 import com.jmr.wrapper.common.Connection;
+import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.server.ConnectionManager;
 import com.jmr.wrapper.server.Server;
 import com.jmr.wrapper.server.ServerConfig;
@@ -43,7 +44,7 @@ public class PingThread implements Runnable {
 				Thread.sleep(((ServerConfig)server.getConfig()).PING_SLEEP_TIME);
 			}
 		} catch (NullPointerException | InterruptedException e) {
-			server.executeThread(new DisconnectedThread(server.getListener(), con));
+			server.executeThread(new DisconnectedThread((SocketListener)server.getListener(), con));
 			ConnectionManager.getInstance().close(con);
 		}
 	}
