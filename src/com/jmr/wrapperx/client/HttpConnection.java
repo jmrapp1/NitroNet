@@ -41,6 +41,21 @@ public class HttpConnection {
 		session.send(object);
 	}
 	
+	/** Sends a complex object to the servlet.
+	 * @param object The object to send.
+	 */
+	public void sendComplex(Object object) {
+		session.sendComplex(object);
+	}
+	
+	/** Sends a complex object to the servlet.
+	 * @param object The object to send.
+	 * @param splitAmount The amount of times to split the object.
+	 */
+	public void sendComplex(Object object, int splitAmount) {
+		session.sendComplex(object, splitAmount);
+	}
+	
 	/** Sets the session of the client if the cookie changes.
 	 * @param session The new session.
 	 */

@@ -116,7 +116,13 @@ public abstract class ServerServlet extends HttpServlet {
 				
 				/** Check if the checksums are equal. If they aren't it means the packet was edited or didn't send completely. */
 				if (checksumSent.equals(checksumVal)) {
-					new ReceivedThread(server.getListener(), session, object).run(); //Cant create thread because response will send back before completed
+					if (object instanceof String && ((String) object).equalsIgnoreCase("ConnectionSetup")) {
+						String val = (String) object;
+						if (val.equalsIgnoreCase("ConnectionSetup"))
+							session.send(new String("ConnectResponse"));
+					} else {
+						new ReceivedThread(server.getListener(), session, object).run(); //Cant create thread because response will send back before completed
+					}
 				}
 				is.close();
 				objIn.close();

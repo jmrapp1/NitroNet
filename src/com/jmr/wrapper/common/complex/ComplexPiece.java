@@ -1,12 +1,16 @@
 package com.jmr.wrapper.common.complex;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import com.jmr.wrapper.client.Client;
 import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapperx.client.HttpPostThread;
+import com.jmr.wrapperx.server.HttpSendThread;
 
 /**
  * Networking Library
@@ -70,6 +74,22 @@ public class ComplexPiece {
 			udpOut.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/** Sends the piece over HTTP.
+	 * @param url The URL of the location of the servlet.
+	 * @param cookie The session cookie.
+	 * @param out The output stream of the response if on server side.
+	 */
+	public void sendHttp(String url, String cookie, BufferedOutputStream out) {
+		if (neSocket instanceof Client && url != null) {
+			if (cookie == null)
+				neSocket.executeThread(new Thread(new HttpPostThread((Client)neSocket, url, data)));
+			else
+				neSocket.executeThread(new Thread(new HttpPostThread((Client)neSocket, url, data, cookie)));
+		} else {
+			new HttpSendThread(data, out).run();
 		}
 	}
 	

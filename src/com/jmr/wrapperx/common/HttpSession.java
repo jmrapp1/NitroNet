@@ -9,6 +9,7 @@ import com.jmr.wrapper.client.Client;
 import com.jmr.wrapper.common.ConnectionUtils;
 import com.jmr.wrapper.common.IConnection;
 import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.complex.ComplexObject;
 import com.jmr.wrapperx.client.HttpPostThread;
 import com.jmr.wrapperx.server.HttpSendThread;
 
@@ -46,9 +47,23 @@ public class HttpSession implements IConnection {
 	/** A client's session stored on the servlet or client side. Holds user information
 	 * and allows objects to be sent over a stream.
 	 * 
-	 * @param cookie The cookie of the session.
+	 * @param address The address of the client.
+	 * @param user The user of the client.
 	 * @param neSocket Instance of the NESocket for encryption/decryption.
-	 * @param url URL of the servlet.
+	 */
+	public HttpSession(String address, String user, NESocket neSocket) {
+		this.neSocket = neSocket;
+		url = null;
+		id = ID_INCREMENT++;
+		cookie = id + address + user;
+	}
+	
+	/** A client's session stored on the servlet or client side. Holds user information
+	 * and allows objects to be sent over a stream.
+	 * 
+	 * @param cookie The cookie of the client.
+	 * @param user The user of the client.
+	 * @param neSocket Instance of the NESocket for encryption/decryption.
 	 */
 	public HttpSession(String cookie, NESocket neSocket, String url) {
 		this.neSocket = neSocket;
@@ -57,21 +72,14 @@ public class HttpSession implements IConnection {
 		id = ID_INCREMENT++;
 	}
 	
-	/** @return The session's cookie. */
 	public String getCookie() {
 		return cookie;
 	}
 	
-	/** Sets the output stream to the client.
-	 * @param out The output stream.
-	 */
 	public void setOutputStream(BufferedOutputStream out) {
 		this.out = out;
 	}
 	
-	/** Sends an object over HTTP protocol. 
-	 * @param object The object to send.
-	 */
 	public void send(Object object) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -86,6 +94,33 @@ public class HttpSession implements IConnection {
 			} else {
 				new Thread(new HttpSendThread(data, out)).run();
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+
+	public void sendComplex(Object object) {
+		try {
+			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
+			objOut.writeObject(object);
+			byte[] checksum =  ConnectionUtils.getChecksum(byteOutStream.toByteArray());
+			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
+			new ComplexObject(data, checksum, neSocket).sendHttp(url, cookie, out);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendComplex(Object object, int splitAmount) {
+		try {
+			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
+			objOut.writeObject(object);
+			byte[] checksum =  ConnectionUtils.getChecksum(byteOutStream.toByteArray());
+			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
+			new ComplexObject(data, checksum, neSocket, splitAmount).sendHttp(url, cookie, out);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

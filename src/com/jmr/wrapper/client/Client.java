@@ -118,16 +118,30 @@ public class Client implements NESocket {
 		}
 	}
 	
+	/** Starts a connection to a URL containing a servlet. Sends a small byte to
+	 * initiate the client's cookies. Sleeps for 2 seconds to wait for client cookies
+	 * to be set.
+	 * @param url The servlets URL.
+	 */
 	public void setHttpConnection(String url) {
 		httpConnection = new HttpConnection(this, url);
+		httpConnection.send(new String("ConnectionSetup"));
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	
+	/** @return The servlet connection. */
 	public HttpConnection getHttpConnection() {
 		return httpConnection;
 	}
 	
-	public void sendOverHttp(Object object) {
+	/** Sends an object over HTTP protocol to the servlet.
+	 * @param object The object to send.
+	 */
+	public void sendHttp(Object object) {
 		httpConnection.send(object);
 	}
 	

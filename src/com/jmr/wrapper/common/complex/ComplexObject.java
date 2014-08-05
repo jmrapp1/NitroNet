@@ -1,5 +1,6 @@
 package com.jmr.wrapper.common.complex;
 
+import java.io.BufferedOutputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -101,6 +102,12 @@ public class ComplexObject {
 	public void sendUdp(DatagramSocket udpOut, InetAddress address, int port) {
 		for (ComplexPiece piece : pieces)
 			neSocket.executeThread(new ComplexUdpSendThread(piece, udpOut, address, port));
+	}
+	
+	public void sendHttp(String url, String cookie, BufferedOutputStream out) {
+		for (ComplexPiece piece : pieces) {
+			piece.sendHttp(url, cookie, out);
+		}
 	}
 	
 	/** Copies part of one array to another.

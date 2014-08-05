@@ -151,7 +151,9 @@ public class HttpPostThread implements Runnable {
 				
 				/** Check if the checksums are equal. If they aren't it means the packet was edited or didn't send completely. */
 				if (checksumSent.equals(checksumVal)) {
-					client.executeThread(new ReceivedThread((HttpListener)client.getListener(), session, object));
+					if (!(object instanceof String && ((String) object).equalsIgnoreCase("ConnectResponse"))) {
+						client.executeThread(new ReceivedThread((HttpListener)client.getListener(), session, object));
+					}
 				} else {
 					client.getServerConnection().addPacketLoss();
 				}
