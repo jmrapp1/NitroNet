@@ -89,6 +89,7 @@ public class ComplexPiece {
 			else
 				neSocket.executeThread(new Thread(new HttpPostThread((Client)neSocket, url, data, cookie)));
 		} else {
+			System.out.println("Sending from server. " + out + " - " + data);
 			new HttpSendThread(data, out).run();
 		}
 	}
