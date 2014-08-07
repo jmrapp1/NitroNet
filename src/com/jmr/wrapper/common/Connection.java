@@ -100,7 +100,6 @@ public class Connection implements IConnection {
 	
 	/** Sends an object over the UDP socket.
 	 * @param object The object to send.
-	 * @throws NESocketClosed Thrown when the socket is closed.
 	 */
 	public void sendUdp(Object object) {
 		try {
@@ -121,10 +120,8 @@ public class Connection implements IConnection {
 	}
 	
 	
-	
 	/** Sends an object over the TCP socket.
 	 * @param object The object to send.
-	 * @throws NESocketClosed Socket closed when trying to send data.
 	 */
 	public void sendTcp(Object object) {
 		try {
@@ -140,6 +137,10 @@ public class Connection implements IConnection {
 		}
 	}
 	
+	/** Sends a complex object over TCP.
+	 * to split the object.
+	 * @param object The object to send.
+	 */
 	public void sendComplexObjectTcp(Object object) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -154,6 +155,11 @@ public class Connection implements IConnection {
 		}
 	}
 	
+	/** Sends a complex object over TCP with a certain amount of times to split the object.
+	 * to split the object.
+	 * @param object The object to send.
+	 * @param splitAmount The amount of times to split the object.
+	 */
 	public void sendComplexObjectTcp(Object object, int splitAmount) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -168,6 +174,10 @@ public class Connection implements IConnection {
 		}
 	}
 	
+	/** Sends a complex object over UDP.
+	 * to split the object.
+	 * @param object The object to send.
+	 */
 	public void sendComplexObjectUdp(Object object) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -180,8 +190,13 @@ public class Connection implements IConnection {
 			e.printStackTrace();
 			ConnectionManager.getInstance().close(this);
 		}
-	}	
+	}
 	
+	/** Sends a complex object over UDP with a certain amount of times to split the object.
+	 * to split the object.
+	 * @param object The object to send.
+	 * @param splitAmount The amount of times to split the object.
+	 */
 	public void sendComplexObjectUdp(Object object, int splitAmount) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();

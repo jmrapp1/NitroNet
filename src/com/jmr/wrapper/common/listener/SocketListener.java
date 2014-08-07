@@ -4,7 +4,7 @@ import com.jmr.wrapper.common.Connection;
 
 /**
  * Networking Library
- * IListener.java
+ * SocketListener.java
  * Purpose: Interface that lays out the framework for listeners attached to either the Server
  * or Client.
  * 

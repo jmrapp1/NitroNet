@@ -4,6 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+/**
+ * Networking Library
+ * ConnectionUtils.java
+ * Purpose: Provides static methods that are used multiple times throughout the different
+ * classes.
+ * 
+ * @author Jon R (Baseball435)
+ * @version 1.0 8/5/2014
+ */
+
 public class ConnectionUtils {
 
 	/** Gets the byte array of the object, the checksum of the object, and combines them into

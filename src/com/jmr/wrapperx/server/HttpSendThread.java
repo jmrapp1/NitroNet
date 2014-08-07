@@ -38,5 +38,5 @@ public class HttpSendThread implements Runnable {
 			e.printStackTrace();
 		}
 	}
-
+	
 }

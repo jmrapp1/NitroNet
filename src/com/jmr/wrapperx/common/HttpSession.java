@@ -72,14 +72,21 @@ public class HttpSession implements IConnection {
 		id = ID_INCREMENT++;
 	}
 	
+	/** @return The session's cookies. */
 	public String getCookie() {
 		return cookie;
 	}
 	
+	/** Sets the output stream of the session so the server can send bytes over it.
+	 * @param out The output stream.
+	 */
 	public void setOutputStream(BufferedOutputStream out) {
 		this.out = out;
 	}
 	
+	/** Sends an object to the session or servlet.
+	 * @param object The object to send.
+	 */
 	public void send(Object object) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -92,14 +99,16 @@ public class HttpSession implements IConnection {
 				else
 					neSocket.executeThread(new Thread(new HttpPostThread((Client)neSocket, url, data, cookie)));
 			} else {
-				new Thread(new HttpSendThread(data, out)).run();
+				new Thread(new HttpSendThread(data, out)).start();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-
+	/** Sends a complex object to the session or servlet.
+	 * @param object The object to send.
+	 */
 	public void sendComplex(Object object) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -113,6 +122,11 @@ public class HttpSession implements IConnection {
 		}
 	}
 	
+	/** Sends a complex object to the session or servlet with a certain amount of times
+	 * to split the object.
+	 * @param object The object to send.
+	 * @param splitAmount The amount of times to split the object.
+	 */
 	public void sendComplex(Object object, int splitAmount) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
