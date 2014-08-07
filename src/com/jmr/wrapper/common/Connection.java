@@ -51,8 +51,8 @@ public class Connection implements IConnection {
 	/** The amount of UDP packets received that were corrupted. */
 	private int packetsLossed = 0;
 	
-	/** Instance of the NESocket (either Client or Server). */
-	private NESocket neSocket;
+	/** Instance of the protocol. */
+	private IProtocol protocol;
 	
 	/** Creates a new connection.
 	 * @param port Instance of the UDP port.
@@ -106,7 +106,7 @@ public class Connection implements IConnection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] data = ConnectionUtils.getByteArray(neSocket, byteOutStream, object);
+			byte[] data = ConnectionUtils.getByteArray(protocol, byteOutStream, object);
 			DatagramPacket sendPacket = new DatagramPacket(data, data.length, address, port);
 			udpSocket.send(sendPacket);
 			objOut.flush();
@@ -128,7 +128,7 @@ public class Connection implements IConnection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] data = ConnectionUtils.getByteArray(neSocket, byteOutStream, object);
+			byte[] data = ConnectionUtils.getByteArray(protocol, byteOutStream, object);
 			tcpOut.write(data);
 			tcpOut.flush();
 		} catch (IOException e) {
@@ -147,8 +147,8 @@ public class Connection implements IConnection {
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
 			byte[] checksum =  ConnectionUtils.getChecksum(byteOutStream.toByteArray());
-			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
-			new ComplexObject(data, checksum, neSocket).sendTcp(tcpOut);
+			byte[] data =  ConnectionUtils.getCompressedByteArray(protocol, byteOutStream, object);
+			new ComplexObject(data, checksum, protocol).sendTcp(tcpOut);
 		} catch (IOException e) {
 			e.printStackTrace();
 			ConnectionManager.getInstance().close(this);
@@ -166,8 +166,8 @@ public class Connection implements IConnection {
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
 			byte[] checksum = ConnectionUtils.getChecksum(byteOutStream.toByteArray());
-			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
-			new ComplexObject(data, checksum, neSocket, splitAmount).sendTcp(tcpOut);
+			byte[] data =  ConnectionUtils.getCompressedByteArray(protocol, byteOutStream, object);
+			new ComplexObject(data, checksum, protocol, splitAmount).sendTcp(tcpOut);
 		} catch (IOException e) {
 			e.printStackTrace();
 			ConnectionManager.getInstance().close(this);
@@ -184,8 +184,8 @@ public class Connection implements IConnection {
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
 			byte[] checksum = ConnectionUtils.getChecksum(byteOutStream.toByteArray());
-			byte[] data = ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
-			new ComplexObject(data, checksum, neSocket).sendUdp(udpSocket, address, port);
+			byte[] data = ConnectionUtils.getCompressedByteArray(protocol, byteOutStream, object);
+			new ComplexObject(data, checksum, protocol).sendUdp(udpSocket, address, port);
 		} catch (IOException e) {
 			e.printStackTrace();
 			ConnectionManager.getInstance().close(this);
@@ -203,8 +203,8 @@ public class Connection implements IConnection {
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
 			byte[] checksum = ConnectionUtils.getChecksum(byteOutStream.toByteArray());
-			byte[] data = ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
-			new ComplexObject(data, checksum, neSocket, splitAmount).sendUdp(udpSocket, address, port);
+			byte[] data = ConnectionUtils.getCompressedByteArray(protocol, byteOutStream, object);
+			new ComplexObject(data, checksum, protocol, splitAmount).sendUdp(udpSocket, address, port);
 		} catch (IOException e) {
 			e.printStackTrace();
 			ConnectionManager.getInstance().close(this);
@@ -227,9 +227,9 @@ public class Connection implements IConnection {
 		return tcpOut;
 	}
 	
-	/** Sets the instance of the NESocket (either Client or Server). */
-	public void setNESocketInstance(NESocket neSocket) {
-		this.neSocket = neSocket;
+	/** Sets the instance of the protocol being used. */
+	public void setProtocol(IProtocol protocol) {
+		this.protocol = protocol;
 	}
 	
 	/** Closes the connection. */

@@ -4,11 +4,11 @@ import java.net.DatagramSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
 import com.jmr.wrapper.common.listener.IListener;
-import com.jmr.wrapper.encryption.Encryptor;
+import com.jmr.wrapper.encryption.IEncryptor;
 import com.jmr.wrapper.server.ServerConfig;
 import com.jmr.wrapperx.common.HttpListener;
 
@@ -23,7 +23,7 @@ import com.jmr.wrapperx.common.HttpListener;
  * @version 1.0 8/4/2014
  */
 
-public class HttpServer implements NESocket {
+public class HttpServer implements IProtocol {
 
 	/** Singleton instance of the server. */
 	private static final HttpServer instance = new HttpServer();
@@ -37,14 +37,14 @@ public class HttpServer implements NESocket {
 	/** The server configurations. */
 	private ServerConfig serverConfig;
 	
-	/** The type of encryption to use when sending objects or TCP or UDP. */
-	private Encryptor encryptionMethod;
+	/** The type of encryption to use when sending objects over HTTP protocol. */
+	private IEncryptor encryptionMethod;
 	
 	/** Starts a new HTTP server with the default settings. */
 	private HttpServer() {
 		mainExecutor = Executors.newCachedThreadPool();
 		serverConfig = new ServerConfig();
-		ComplexManager.getInstance().setSocket(this);
+		ComplexManager.getInstance().setProtocol(this);
 	}
 
 	@Override
@@ -85,12 +85,12 @@ public class HttpServer implements NESocket {
 	}
 	
 	@Override
-	public Encryptor getEncryptionMethod() {
+	public IEncryptor getEncryptionMethod() {
 		return encryptionMethod;
 	}
 
 	@Override
-	public void setEncryptionMethod(Encryptor encryptor) {
+	public void setEncryptionMethod(IEncryptor encryptor) {
 		this.encryptionMethod = encryptor;
 	}
 

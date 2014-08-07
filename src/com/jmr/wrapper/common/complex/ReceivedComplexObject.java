@@ -9,12 +9,12 @@ import java.util.zip.Checksum;
 
 import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.IConnection;
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 
 /**
  * Networking Library
  * ReceivedComplexObject.java
- * Purpose: A complex object that was received over a socket. This contains the pieces of the object and methods to form the object
+ * Purpose: A complex object that was received over a stream. This contains the pieces of the object and methods to form the object
  * back together.
  * 
  * @author Jon R (Baseball435)
@@ -32,8 +32,8 @@ public class ReceivedComplexObject {
 	/** The checksum value of the object. */
 	private final String checksum;
 	
-	/** Instance of the NESocket. */
-	private final NESocket neSocket;
+	/** Instance of the protocol. */
+	private final IProtocol protocol;
 
 	/** The amount of pieces in the object. */
 	private final int pieceSize;
@@ -41,17 +41,17 @@ public class ReceivedComplexObject {
 	/** The current amount of pieces received. */
 	private int index = 0;
 	
-	/** Creates a new complex object that was received over a socket.
+	/** Creates a new complex object that was received over a stream.
 	 * @param checksum The checksum of the object.
 	 * @param con The connection the piece's came from.
 	 * @param pieceSize The amount of pieces in the object.
-	 * @param neSocket Instance of the socket. 
+	 * @param protocol Instance of the protocol. 
 	 */
-	public ReceivedComplexObject(String checksum, IConnection con, int pieceSize, NESocket neSocket) {
+	public ReceivedComplexObject(String checksum, IConnection con, int pieceSize, IProtocol protocol) {
 		this.checksum = checksum;
 		this.con = con;
 		this.pieceSize = pieceSize;
-		this.neSocket = neSocket;
+		this.protocol = protocol;
 		pieces = new ReceivedComplexPiece[pieceSize];
 	}
 	
@@ -86,8 +86,8 @@ public class ReceivedComplexObject {
 			for (int i = 0; i < objectArray.length; i++)
 				objectArray[i] = data[i];
 
-			if (neSocket.getEncryptionMethod() != null)
-				data = neSocket.getEncryptionMethod().decrypt(objectArray);
+			if (protocol.getEncryptionMethod() != null)
+				data = protocol.getEncryptionMethod().decrypt(objectArray);
 
 			/** Get the checksum value of the object array. */
 			String checksumVal = getChecksumOfObject(objectArray);

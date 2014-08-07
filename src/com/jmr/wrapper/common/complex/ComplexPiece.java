@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import com.jmr.wrapper.client.Client;
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapperx.client.HttpPostThread;
 import com.jmr.wrapperx.server.HttpSendThread;
 
@@ -33,20 +33,20 @@ public class ComplexPiece {
 	/** The byte array of the data and checksum. */
 	private final byte[] data, checksum;
 	
-	/** Instance of the NESocket. */
-	private final NESocket neSocket;
+	/** Instance of the protocol. */
+	private final IProtocol protocol;
 
 	/** Creates a byte array holding the data, id, and checksum of the complex object.
 	 * @param id The ID.
 	 * @param pieceAmount The amount of pieces in the complex object.
 	 * @param data The piece of the object's byte array.
-	 * @param neSocket Instance of the socket. 
+	 * @param protocol Instance of the protocol. 
 	 * @param checksum Object's checksum byte array.
 	 */
-	public ComplexPiece(int id, int pieceAmount, byte[] data, NESocket neSocket, byte[] checksum) {
+	public ComplexPiece(int id, int pieceAmount, byte[] data, IProtocol protocol, byte[] checksum) {
 		this.id = id;
 		this.pieceAmount = pieceAmount;
-		this.neSocket = neSocket;
+		this.protocol = protocol;
 		this.checksum = checksum;
 		this.data = getByteArray(data);
 	}
@@ -83,11 +83,11 @@ public class ComplexPiece {
 	 * @param out The output stream of the response if on server side.
 	 */
 	public void sendHttp(String url, String cookie, BufferedOutputStream out) {
-		if (neSocket instanceof Client && url != null) {
+		if (protocol instanceof Client && url != null) {
 			if (cookie == null)
-				neSocket.executeThread(new Thread(new HttpPostThread((Client)neSocket, url, data)));
+				protocol.executeThread(new Thread(new HttpPostThread((Client)protocol, url, data)));
 			else
-				neSocket.executeThread(new Thread(new HttpPostThread((Client)neSocket, url, data, cookie)));
+				protocol.executeThread(new Thread(new HttpPostThread((Client)protocol, url, data, cookie)));
 		}
 	}
 	
@@ -115,13 +115,13 @@ public class ComplexPiece {
 	 * @return The combined array.
 	 */
 	private byte[] addArrays(byte[] array, byte[] checksumBytes) {
-		byte[] concat = new byte[neSocket.getConfig().PACKET_BUFFER_SIZE];
+		byte[] concat = new byte[protocol.getConfig().PACKET_BUFFER_SIZE];
 		
 		System.arraycopy(checksumBytes, 0, concat, 0, checksumBytes.length);
 		System.arraycopy(array, 0, concat, checksumBytes.length, array.length);
 		
-		if (neSocket.getEncryptionMethod() != null) {
-			concat = neSocket.getEncryptionMethod().encrypt(concat);
+		if (protocol.getEncryptionMethod() != null) {
+			concat = protocol.getEncryptionMethod().encrypt(concat);
 		}
 		
 		return concat;

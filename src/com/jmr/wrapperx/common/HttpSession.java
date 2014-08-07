@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import com.jmr.wrapper.client.Client;
 import com.jmr.wrapper.common.ConnectionUtils;
 import com.jmr.wrapper.common.IConnection;
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexObject;
 import com.jmr.wrapperx.client.HttpPostThread;
 import com.jmr.wrapperx.server.HttpSendThread;
@@ -33,7 +33,7 @@ public class HttpSession implements IConnection {
 	private final int id;
 	
 	/** Instance of the NESocket used to encrypt/decrypt data. */
-	private final NESocket neSocket;
+	private final IProtocol neSocket;
 	
 	/** A client's cookie data. */
 	private final String cookie;
@@ -51,7 +51,7 @@ public class HttpSession implements IConnection {
 	 * @param user The user of the client.
 	 * @param neSocket Instance of the NESocket for encryption/decryption.
 	 */
-	public HttpSession(String address, String user, NESocket neSocket) {
+	public HttpSession(String address, String user, IProtocol neSocket) {
 		this.neSocket = neSocket;
 		url = null;
 		id = ID_INCREMENT++;
@@ -65,7 +65,7 @@ public class HttpSession implements IConnection {
 	 * @param user The user of the client.
 	 * @param neSocket Instance of the NESocket for encryption/decryption.
 	 */
-	public HttpSession(String cookie, NESocket neSocket, String url) {
+	public HttpSession(String cookie, IProtocol neSocket, String url) {
 		this.neSocket = neSocket;
 		this.url = url;
 		this.cookie = cookie;

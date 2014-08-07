@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.threads.ComplexUdpSendThread;
 
 /**
@@ -36,8 +36,8 @@ public class ComplexObject {
 	/** The data and checksum byte arrays. */
 	private final byte[] data, checksum;
 	
-	/** Instance of the NESocket. */
-	private final NESocket neSocket;
+	/** Instance of the protocol being used. */
+	private final IProtocol protocol;
 	
 	/** Array to hold all of the pieces. */
 	private final ArrayList<ComplexPiece> pieces = new ArrayList<ComplexPiece>();
@@ -45,28 +45,28 @@ public class ComplexObject {
 	/** Creates a new complex object and loads the pieces by splitting the data. 
 	 * @param data The object's byte array. 
 	 * @param checksum The object's checksum value.
-	 * @param neSocket Instance of the NESocket.
+	 * @param protocol Instance of the protocol.
 	 */
-	public ComplexObject(byte[] data, byte[] checksum, NESocket neSocket) {
-		this(data, checksum, neSocket, 3);
+	public ComplexObject(byte[] data, byte[] checksum, IProtocol protocol) {
+		this(data, checksum, protocol, 3);
 	}
 	
 	/** Creates a new complex object and loads the pieces by splitting the data. 
 	 * @param data The object's byte array. 
 	 * @param checksum The object's checksum value.
-	 * @param neSocket Instance of the NESocket.
+	 * @param protocol Instance of the protocol.
 	 * @param splitAmount The amount of splits to make.
 	 */
-	public ComplexObject(byte[] data, byte[] checksum, NESocket neSocket, int splitAmount) {
+	public ComplexObject(byte[] data, byte[] checksum, IProtocol protocol, int splitAmount) {
 		this.id = ID_INCREMENT++;
 		this.data = data;	
-		this.neSocket = neSocket;
+		this.protocol = protocol;
 		this.splitAmount = splitAmount;
 		this.checksum = checksum;
 		loadPieces();
 	}
 	
-	/** Splits the object's byte array into pieces and gets them ready to be sent to over the socket. */
+	/** Splits the object's byte array into pieces and gets them ready to be sent to over the stream. */
 	private void loadPieces() {
 		int bytesPerSend = data.length / splitAmount;
 		int extra = 0;
@@ -78,11 +78,11 @@ public class ComplexObject {
 		}
 		for (int i = 0; i < splitAmount; i++) {
 			byte[] splitData = copyArray(data, bytesPerSend, bytesPerSend * i);
-			pieces.add(new ComplexPiece(i, pieceAmount, splitData, neSocket, checksum));
+			pieces.add(new ComplexPiece(i, pieceAmount, splitData, protocol, checksum));
 		}
 		if (extra > 0) {
 			byte[] splitData = copyArray(data, extra, bytesPerSend * (splitAmount));
-			pieces.add(new ComplexPiece(splitAmount, pieceAmount, splitData, neSocket, checksum));
+			pieces.add(new ComplexPiece(splitAmount, pieceAmount, splitData, protocol, checksum));
 		}
 	}
 	
@@ -101,7 +101,7 @@ public class ComplexObject {
 	 */
 	public void sendUdp(DatagramSocket udpOut, InetAddress address, int port) {
 		for (ComplexPiece piece : pieces)
-			neSocket.executeThread(new ComplexUdpSendThread(piece, udpOut, address, port));
+			protocol.executeThread(new ComplexUdpSendThread(piece, udpOut, address, port));
 	}
 	
 	public void sendHttp(String url, String cookie, BufferedOutputStream out) {

@@ -3,7 +3,7 @@ package com.jmr.wrapper.common.complex;
 /**
  * Networking Library
  * ReceivedComplexPiece.java
- * Purpose: A piece of a complex object received from a socket. This piece will later be used to form back together the complex
+ * Purpose: A piece of a complex object received from a stream. This piece will later be used to form back together the complex
  * object and pass it to the event listener. 
  * 
  * @author Jon R (Baseball435)

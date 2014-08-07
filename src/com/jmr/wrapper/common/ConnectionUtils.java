@@ -23,18 +23,18 @@ public class ConnectionUtils {
 	 * @param object The object being sent.
 	 * @return The byte array with the size of it being Config.PACKET_BUFFER_SIZE
 	 */
-	public static byte[] getByteArray(NESocket neSocket, ByteArrayOutputStream stream, Object object) {
+	public static byte[] getByteArray(IProtocol protocol, ByteArrayOutputStream stream, Object object) {
 		byte[] array = stream.toByteArray();
 
 		byte[] checksumBytes = getChecksum(array);
 		
-		byte[] concat = new byte[neSocket.getConfig().PACKET_BUFFER_SIZE];
+		byte[] concat = new byte[protocol.getConfig().PACKET_BUFFER_SIZE];
 		
 		System.arraycopy(checksumBytes, 0, concat, 0, checksumBytes.length);
 		System.arraycopy(array, 0, concat, checksumBytes.length, array.length);
 		
-		if (neSocket.getEncryptionMethod() != null) {
-			concat = neSocket.getEncryptionMethod().encrypt(concat);
+		if (protocol.getEncryptionMethod() != null) {
+			concat = protocol.getEncryptionMethod().encrypt(concat);
 		}
 		
 		return concat;
@@ -47,7 +47,7 @@ public class ConnectionUtils {
 	 * @param object The object being sent.
 	 * @return The byte array with the size of it being the byte length of the object and checksum.
 	 */
-	public static byte[] getCompressedByteArray(NESocket neSocket, ByteArrayOutputStream stream, Object object) {
+	public static byte[] getCompressedByteArray(IProtocol protocol, ByteArrayOutputStream stream, Object object) {
 		byte[] array = stream.toByteArray();
 		byte[] checksumBytes = getChecksum(array);
 		
@@ -56,8 +56,8 @@ public class ConnectionUtils {
 		System.arraycopy(checksumBytes, 0, concat, 0, checksumBytes.length);
 		System.arraycopy(array, 0, concat, checksumBytes.length, array.length);
 		
-		if (neSocket.getEncryptionMethod() != null) {
-			concat = neSocket.getEncryptionMethod().encrypt(concat);
+		if (protocol.getEncryptionMethod() != null) {
+			concat = protocol.getEncryptionMethod().encrypt(concat);
 		}
 		
 		return concat;

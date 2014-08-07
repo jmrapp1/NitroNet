@@ -14,11 +14,11 @@ import java.util.concurrent.Executors;
 import com.jmr.wrapper.client.threads.ClientTcpReadThread;
 import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.ConnectionUtils;
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
 import com.jmr.wrapper.common.listener.IListener;
-import com.jmr.wrapper.encryption.Encryptor;
+import com.jmr.wrapper.encryption.IEncryptor;
 import com.jmr.wrapper.server.ConnectionManager;
 import com.jmr.wrapper.server.threads.UdpReadThread;
 import com.jmr.wrapperx.client.HttpConnection;
@@ -35,7 +35,7 @@ import com.jmr.wrapperx.client.HttpConnection;
  * @version 1.0 7/19/2014
  */
 
-public class Client implements NESocket {
+public class Client implements IProtocol {
 
 	/** The TCP and UDP port. */
 	private final int tcpPort, udpPort;
@@ -62,7 +62,7 @@ public class Client implements NESocket {
 	private ClientConfig clientConfig;
 	
 	/** The type of encryption to use when sending and receiving packets. */
-	private Encryptor encryptionMethod;
+	private IEncryptor encryptionMethod;
 
 	/** Connection to the HTTP Server if set. */
 	private HttpConnection httpConnection;
@@ -102,8 +102,8 @@ public class Client implements NESocket {
 			tcpSocket = new Socket(address, tcpPort);
 			tcpSocket.setSoLinger(true, 0);
 			serverConnection = new Connection(udpPort, tcpSocket, udpSocket);
-			serverConnection.setNESocketInstance(this);
-			ComplexManager.getInstance().setSocket(this);
+			serverConnection.setProtocol(this);
+			ComplexManager.getInstance().setProtocol(this);
 			ConnectionManager.getInstance().addConnection(serverConnection);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -163,12 +163,12 @@ public class Client implements NESocket {
 	}
 	
 	@Override
-	public Encryptor getEncryptionMethod() {
+	public IEncryptor getEncryptionMethod() {
 		return encryptionMethod;
 	}
 
 	@Override
-	public void setEncryptionMethod(Encryptor encryptor) {
+	public void setEncryptionMethod(IEncryptor encryptor) {
 		this.encryptionMethod = encryptor;
 	}
 	

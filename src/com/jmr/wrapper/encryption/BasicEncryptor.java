@@ -10,7 +10,7 @@ package com.jmr.wrapper.encryption;
  * @version 1.0 7/19/2014
  */
 
-public class BasicEncryptor implements Encryptor {
+public class BasicEncryptor implements IEncryptor {
 
 	@Override
 	public byte[] encrypt(byte[] data) {

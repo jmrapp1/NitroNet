@@ -5,7 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 import com.jmr.wrapper.common.Connection;
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.server.ConnectionManager;
 
 /**
@@ -24,22 +24,22 @@ public class UdpReadThread implements Runnable {
 	private DatagramSocket udpSocket;
 	
 	/** Instance of the Socket. */
-	private final NESocket socket;
+	private final IProtocol protocol;
 	
 	/** Creates a new thread to wait for UDP packets on the connection.
 	 * @param socket Instance of the socket.
 	 * @param udpSocket Instance of the UDP socket. 
 	 */
-	public UdpReadThread(NESocket socket, DatagramSocket udpSocket) {
+	public UdpReadThread(IProtocol protocol, DatagramSocket udpSocket) {
 		this.udpSocket = udpSocket;
-		this.socket = socket;
+		this.protocol = protocol;
 	}
 	
 	@Override
 	public void run() { 
 		while (udpSocket != null) {
 			try {
-				byte[] incomingData = new byte[socket.getConfig().PACKET_BUFFER_SIZE];
+				byte[] incomingData = new byte[protocol.getConfig().PACKET_BUFFER_SIZE];
 				DatagramPacket readPacket = new DatagramPacket(incomingData, incomingData.length);
 				udpSocket.receive(readPacket);
 				Connection con = ConnectionManager.getInstance().getConnection(readPacket.getAddress());
@@ -47,11 +47,11 @@ public class UdpReadThread implements Runnable {
 					System.out.println("Connection tried sending a packet without being connected to TCP.");
 					return;
 				}
-				socket.executeThread(new UdpHandleThread(socket, con, readPacket));
+				protocol.executeThread(new UdpHandleThread(protocol, con, readPacket));
 			} catch (IOException e) {
 				udpSocket = null;
 				e.printStackTrace();
-				socket.close();
+				protocol.close();
 			}
 		}
 	}

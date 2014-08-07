@@ -8,19 +8,19 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import com.jmr.wrapper.common.Connection;
-import com.jmr.wrapper.common.NESocket;
+import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.complex.ReceivedComplexPiece;
 
 public class UdpHandleThread implements Runnable {
 
 	private final Connection con;
-	private final NESocket socket;
+	private final IProtocol protocol;
 	private final DatagramPacket readPacket;
 	
-	public UdpHandleThread(NESocket socket, Connection con, DatagramPacket readPacket) {
+	public UdpHandleThread(IProtocol protocol, Connection con, DatagramPacket readPacket) {
 		this.con = con;
-		this.socket = socket;
+		this.protocol = protocol;
 		this.readPacket = readPacket;
 	}
 	
@@ -31,8 +31,8 @@ public class UdpHandleThread implements Runnable {
 			byte[] data = readPacket.getData();
 			
 			/** Decrypt the data if the encryptor is set. */
-			if (socket.getEncryptionMethod() != null)
-				data = socket.getEncryptionMethod().decrypt(data);
+			if (protocol.getEncryptionMethod() != null)
+				data = protocol.getEncryptionMethod().decrypt(data);
 			
 			/** Get the checksum found before the packet was sent. */
 			String checksumSent = getChecksumFromPacket(data);
@@ -60,7 +60,7 @@ public class UdpHandleThread implements Runnable {
 					if (object instanceof String && ((String) object).equalsIgnoreCase("SettingUdpPort")) {
 						con.setUdpPort(readPacket.getPort());
 					} else {
-						socket.executeThread(new ReceivedThread(socket.getListener(), con, object));
+						protocol.executeThread(new ReceivedThread(protocol.getListener(), con, object));
 					}
 				} else {
 					System.out.println("Lost: " + object + " Checksums: " + checksumSent + " - " + checksumVal);

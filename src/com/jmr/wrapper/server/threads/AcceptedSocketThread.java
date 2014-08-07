@@ -39,7 +39,7 @@ public class AcceptedSocketThread implements Runnable {
 	@Override
 	public void run() {
 		Connection con = new Connection(server.getUdpPort(), socket, server.getUdpSocket());
-		con.setNESocketInstance(server);
+		con.setProtocol(server);
 		ConnectionManager.getInstance().addConnection(con);
 		server.executeThread(new NewConnectionThread(server.getListener(), con));
 		if (((ServerConfig)server.getConfig()).PING_CLIENTS)
