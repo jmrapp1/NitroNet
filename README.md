@@ -164,3 +164,86 @@ public class ClientStarter {
 You will see the correct strings be outputed and you will also see a string being received called "TestAlivePing". This is a small packet sent to the client to test on the server side whether or not you are still connected. You may just ignore this packet. 
 
 We have now setup the basis of a functional server and client.
+
+Sending Packets
+===============
+
+We can now get into some interesting parts of the library and what it has to offer. The library seamlessly allows you to send packets over TCP and UDP using only one method for each. The library will also encrypt (we will go over this later) and ensure that the packet is fully received on the other side (I will go over what happens in the background at the end). Sending an object over to the server or client is very simple. We will first begin on the client side by sending a String to the server when connected.
+
+```java
+public class ClientListener implements SocketListener {
+
+	@Override
+	public void received(Connection con, Object object) {
+		System.out.println("Received: " + object);
+	}
+
+	@Override
+	public void connected(Connection con) {
+		con.sendTcp("Hey how are you today?");
+	}
+
+	@Override
+	public void disconnected(Connection con) {
+		System.out.println("Disconnected the server.");
+	}
+	
+}
+
+```
+
+This will send the string "Hey how are you today?" when you first connect. Test it and then remove it after. We are going to send an object another way. Lets head to the ClientStarter class and send it from within there.
+
+```java
+public class ClientStarter {
+
+	private final Client client;
+	
+	public ClientStarter() {
+		client = new Client("localhost", 4395, 4395);
+		client.setListener(new ClientListener());
+		client.connect();
+		if (client.isConnected()) {
+			System.out.println("Connected to the server.");
+			client.getServerConnection().sendTcp("Hey this was sent another way!");
+		}
+	}
+	
+	public static void main(String[] args) {
+		new ClientStarter();
+	}
+	
+}
+```
+
+The getter method "getServerConnection()" from Client returns the instance of the server connection object. From here you can send objects or bytes of data over to the server.
+
+Lets see how we can now send information back to clients from the server. 
+
+```java
+public class ServerListener implements SocketListener {
+
+	@Override
+	public void received(Connection con, Object object) {
+		System.out.println("Received: " + object);
+		con.sendUdp("I just got a packet from you!");
+	}
+
+	@Override
+	public void connected(Connection con) {
+		System.out.println("New client connected.");
+	}
+
+	@Override
+	public void disconnected(Connection con) {
+		System.out.println("Client has disconnected.");
+	}
+	
+}
+
+```
+
+So now when a packet is received on the server side it will send back a string over UDP letting them know!
+
+Sending Custom Objects
+======================
