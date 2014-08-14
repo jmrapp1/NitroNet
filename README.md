@@ -11,7 +11,7 @@ The server is the heart of a networking application. It waits for incoming conne
 ```
 public class ServerStarter {
 
-  private Server server;
+	private Server server;
 	
 	public ServerStarter() {
 		try {
