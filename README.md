@@ -40,5 +40,26 @@ Starting A Client
 When you want to connect to a server you need to have a client to connect to it. The client is what interacts with the server to send information or request information. We are going to start a client that connects to our server on the same ports.
 
 ```java
+public class ClientStarter {
 
+	private final Client client;
+	
+	public ClientStarter() {
+		client = new Client("localhost", 4395, 4395);
+		client.connect();
+		if (client.isConnected()) {
+			System.out.println("Connected to the server.");
+		}
+	}
+	
+	public static void main(String[] args) {
+		new ClientStarter();
+	}
+	
+}
 ```
+
+We connect to the IP address "localhost" (which is our computer) on the TCP and UDP ports 4395. We then call the connect method and check to see if it connected to the server. 
+
+Creating Socket Listeners
+=========================
