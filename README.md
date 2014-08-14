@@ -8,7 +8,7 @@ Starting A Server
 
 The server is the heart of a networking application. It waits for incoming connections as well as incoming packets. Without the server there is nothing to communicate to clients and no connections being made. Starting a server using the library is very simple. The only information you need to specify is the TCP and UDP ports that you want to listen to.
 
-```
+```java
 public class ServerStarter {
 
 	private Server server;
@@ -31,10 +31,14 @@ public class ServerStarter {
 	
 }
 ```
-When starting the server we bound it to the port 4395. Both of the ports can be different if you choose, they don't have to be the same. Starting it also has the possibility to throw a NECantStartServer exception which is only thrown when a running server is already bounded to one of the ports you specified. 
+When starting the server we bound it to the port 4395. Both of the ports can be different if you choose, they don't have to be the same. Starting it also has the possibility to throw a NECantStartServer exception which is only thrown when a running server is already bounded to one of the ports you specified. When the program is run and no exceptions are thrown, it should print out "Started server successfully."
 
 
 Starting A Client
 ================
 
-When you want to connect to a server you need to have a client to connect to it. 
+When you want to connect to a server you need to have a client to connect to it. The client is what interacts with the server to send information or request information. We are going to start a client that connects to our server on the same ports.
+
+```java
+
+```
