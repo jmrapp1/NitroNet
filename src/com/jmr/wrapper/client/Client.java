@@ -1,8 +1,6 @@
 package com.jmr.wrapper.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -13,11 +11,11 @@ import java.util.concurrent.Executors;
 
 import com.jmr.wrapper.client.threads.ClientTcpReadThread;
 import com.jmr.wrapper.common.Connection;
-import com.jmr.wrapper.common.ConnectionUtils;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
 import com.jmr.wrapper.common.listener.IListener;
+import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.encryption.IEncryptor;
 import com.jmr.wrapper.server.ConnectionManager;
 import com.jmr.wrapper.server.threads.UdpReadThread;
@@ -74,6 +72,8 @@ public class Client implements IProtocol {
 	 */
 	public Client(String address, int tcpPort, int udpPort) {
 		try {
+			if (address.equalsIgnoreCase("localhost"))
+				address = InetAddress.getLocalHost().getHostName();
 			this.address = InetAddress.getByName(address);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -98,12 +98,16 @@ public class Client implements IProtocol {
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
+		
 		try {
 			tcpSocket = new Socket(address, tcpPort);
 			tcpSocket.setSoLinger(true, 0);
 			serverConnection = new Connection(udpPort, tcpSocket, udpSocket);
 			serverConnection.setProtocol(this);
 			ComplexManager.getInstance().setProtocol(this);
+			if (listener != null) {
+				((SocketListener)listener).connected(serverConnection);
+			}
 			ConnectionManager.getInstance().addConnection(serverConnection);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -113,8 +117,8 @@ public class Client implements IProtocol {
 		if (tcpSocket != null && tcpSocket.isConnected() && udpSocket != null) {
 			mainExecutor.execute(new UdpReadThread(this, udpSocket));
 			mainExecutor.execute(new ClientTcpReadThread(this, serverConnection));
-			sendTcp(new String("ConnectedToServer"));
-			sendUdp(new String("SettingUdpPort"));
+			serverConnection.sendTcp(new String("ConnectedToServer"));
+			serverConnection.sendUdp(new String("SettingUdpPort"));
 		}
 	}
 	
@@ -136,13 +140,6 @@ public class Client implements IProtocol {
 	/** @return The servlet connection. */
 	public HttpConnection getHttpConnection() {
 		return httpConnection;
-	}
-	
-	/** Sends an object over HTTP protocol to the servlet.
-	 * @param object The object to send.
-	 */
-	public void sendHttp(Object object) {
-		httpConnection.send(object);
 	}
 	
 	/** Sets the listener object.
@@ -196,25 +193,12 @@ public class Client implements IProtocol {
 		}
 		udpSocket.close();
 	}
+	
 	/** @return The connection to the server. */
 	public Connection getServerConnection() {
 		return serverConnection;
 	}
 	
-	/** Sends a packet to the server over UDP
-	 * @param object The object to send.
-	 */
-	public void sendUdp(Object object) {
-		serverConnection.sendUdp(object);
-	}
-	
-	/** Sends a packet to the server over TCP
-	 * @param object The object to send.
-	 */
-	public void sendTcp(Object object) {
-		serverConnection.sendTcp(object);
-	}
-
 	@Override
 	public DatagramSocket getUdpSocket() {
 		return udpSocket;

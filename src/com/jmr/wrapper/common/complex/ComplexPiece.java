@@ -116,7 +116,7 @@ public class ComplexPiece {
 	 */
 	private byte[] addArrays(byte[] array, byte[] checksumBytes) {
 		byte[] concat = new byte[protocol.getConfig().PACKET_BUFFER_SIZE];
-		
+		System.out.println(id + ": " + pieceAmount + " - " + protocol.getConfig().PACKET_BUFFER_SIZE + " - " + array.length + " - " + checksumBytes.length);
 		System.arraycopy(checksumBytes, 0, concat, 0, checksumBytes.length);
 		System.arraycopy(array, 0, concat, checksumBytes.length, array.length);
 		

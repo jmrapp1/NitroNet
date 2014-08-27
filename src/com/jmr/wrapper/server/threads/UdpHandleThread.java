@@ -7,6 +7,8 @@ import java.net.DatagramPacket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import javax.swing.JOptionPane;
+
 import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
@@ -72,6 +74,7 @@ public class UdpHandleThread implements Runnable {
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
+			
 		}
 	}
 
@@ -84,13 +87,20 @@ public class UdpHandleThread implements Runnable {
 	private byte[] getObjectFromPacket(byte[] data) {
 		/** Find the size of the data. Gets rid of all extra null values. */
 		int index = findSizeOfObject(data);		
-		
+
+		this.size = index;
 		/** Create the byte array to store the object. Size is the size of the data array minus the size of the checksum. */
 		byte[] objectArray = new byte[index - 10];
 		
 		/** Get the object and put the bytes into a separate array. */
 		for (int i = 0; i < objectArray.length; i++)
 			objectArray[i] = data[i + 10];
+		if (objectArray[objectArray.length - 1] == -995) {
+			byte[] temp = new byte[objectArray.length - 2];
+			for (int i = 0; i < objectArray.length - 2; i++)
+				temp[i] = objectArray[i];
+			objectArray = temp;
+		}
 		return objectArray;
 	}
 	
@@ -126,7 +136,10 @@ public class UdpHandleThread implements Runnable {
 				count = 0;
 			}
 		}
-		return index;
+		if (count >= 20)
+			return index;
+		else
+			return -1;
 	}
 
 	/** Takes the byte array of an object and gets the checksum from it.
@@ -160,6 +173,8 @@ public class UdpHandleThread implements Runnable {
 	 * @param data The data sent.
 	 * @return The complex object ID.
 	 */ 
+	int size = -2;
+	
 	private int getIdFromComplex(byte[] data) {
 		byte[] idArray = copyArray(data, 4, 1);
 		int size = findSizeOfObject(idArray);

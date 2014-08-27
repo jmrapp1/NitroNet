@@ -42,7 +42,7 @@ public class UdpReadThread implements Runnable {
 				byte[] incomingData = new byte[protocol.getConfig().PACKET_BUFFER_SIZE];
 				DatagramPacket readPacket = new DatagramPacket(incomingData, incomingData.length);
 				udpSocket.receive(readPacket);
-				Connection con = ConnectionManager.getInstance().getConnection(readPacket.getAddress());
+				Connection con = ConnectionManager.getInstance().getConnection(readPacket.getAddress(), readPacket.getPort());
 				if (con == null) {
 					System.out.println("Connection tried sending a packet without being connected to TCP.");
 					return;
@@ -50,8 +50,8 @@ public class UdpReadThread implements Runnable {
 				protocol.executeThread(new UdpHandleThread(protocol, con, readPacket));
 			} catch (IOException e) {
 				udpSocket = null;
-				e.printStackTrace();
 				protocol.close();
+				e.printStackTrace();
 			}
 		}
 	}

@@ -31,7 +31,8 @@ public class DisconnectedThread implements Runnable {
 	
 	@Override
 	public void run() {
-		listener.disconnected(con);
+		if (listener != null)
+			listener.disconnected(con);
 	}
 
 }

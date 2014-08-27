@@ -25,7 +25,15 @@ public class ConnectionUtils {
 	 */
 	public static byte[] getByteArray(IProtocol protocol, ByteArrayOutputStream stream, Object object) {
 		byte[] array = stream.toByteArray();
-
+		
+		if (array[array.length - 1] == 0) {
+			byte[] temp = new byte[array.length + 1];
+			for (int i = 0; i < array.length; i++)
+				temp[i] = array[i];
+			temp[temp.length - 1] = (byte)-995;
+			array = temp;
+		}
+		
 		byte[] checksumBytes = getChecksum(array);
 		
 		byte[] concat = new byte[protocol.getConfig().PACKET_BUFFER_SIZE];

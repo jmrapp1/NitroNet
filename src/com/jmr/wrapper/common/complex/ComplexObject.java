@@ -64,6 +64,7 @@ public class ComplexObject {
 		this.splitAmount = splitAmount;
 		this.checksum = checksum;
 		loadPieces();
+		
 	}
 	
 	/** Splits the object's byte array into pieces and gets them ready to be sent to over the stream. */

@@ -39,10 +39,12 @@ public class NewConnectionThread implements Runnable {
 	
 	@Override
 	public void run() {
-		if (listener instanceof SocketListener)
-			((SocketListener)listener).connected((Connection)con);
-		else if (listener instanceof HttpListener)
-			((HttpListener)listener).connected((HttpSession)con);
+		if (listener != null) {
+			if (listener instanceof SocketListener)
+				((SocketListener)listener).connected((Connection)con);
+			else if (listener instanceof HttpListener)
+				((HttpListener)listener).connected((HttpSession)con);
+		}
 	}
 
 }

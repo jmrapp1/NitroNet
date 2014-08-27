@@ -39,10 +39,12 @@ public class ReceivedThread implements Runnable {
 	
 	@Override
 	public void run() {
-		if (listener instanceof SocketListener)
-			((SocketListener)listener).received((Connection)con, object);
-		else if (listener instanceof HttpListener)
-			((HttpListener)listener).received((HttpSession)con, object);
+		if (listener != null) {
+			if (listener instanceof SocketListener)
+				((SocketListener)listener).received((Connection)con, object);
+			else if (listener instanceof HttpListener)
+				((HttpListener)listener).received((HttpSession)con, object);
+		}
 	}
 
 }

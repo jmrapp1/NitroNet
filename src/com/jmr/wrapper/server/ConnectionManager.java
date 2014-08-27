@@ -41,6 +41,19 @@ public class ConnectionManager {
 		return null;
 	}
 	
+	/** Gets the connection with the set InetAddress.
+	 * @param address The address of the connection.
+	 * @return The connection.
+	 */
+	public Connection getConnection(InetAddress address, int port) {
+		for (Connection con : connections) {
+			if (con.getAddress().equals(address) && (con.getUdpPort() == port || con.getUdpPort() == -1)) {
+				return con;
+			}
+		}
+		return null;
+	}
+	
 	/** Adds a new connection to the list.
 	 * @param con The connection.
 	 */

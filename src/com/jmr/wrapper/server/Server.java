@@ -2,9 +2,11 @@ package com.jmr.wrapper.server;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,8 +14,8 @@ import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
 import com.jmr.wrapper.common.exceptions.NECantStartServer;
-import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.common.listener.IListener;
+import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.encryption.IEncryptor;
 import com.jmr.wrapper.server.threads.TcpAcceptThread;
 import com.jmr.wrapper.server.threads.UdpReadThread;
@@ -57,17 +59,20 @@ public class Server implements IProtocol {
 	 * @param tcpPort The TCP port.
 	 * @param udpPort The UDP port.
 	 * @throws NECantStartServer 
-	 */
+	 * @throws UnknownHostException 
+	 */	
 	public Server(int tcpPort, int udpPort) throws NECantStartServer {
 		serverConfig = new ServerConfig();
 		try {
-			tcpSocket = new ServerSocket(tcpPort);
+			tcpSocket = new ServerSocket(tcpPort, 1, InetAddress.getByName("0.0.0.0"));
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new NECantStartServer();
 		}
 		try {
-			udpSocket = new DatagramSocket(new InetSocketAddress("localhost", udpPort));
+			udpSocket = new DatagramSocket(udpPort);
 		} catch (SocketException e) {
+			e.printStackTrace();
 			throw new NECantStartServer();
 		}
 		this.udpPort = udpPort;

@@ -105,6 +105,14 @@ public class ClientTcpReadThread implements Runnable {
 		/** Get the object and put the bytes into a separate array. */
 		for (int i = 0; i < objectArray.length; i++)
 			objectArray[i] = data[i + 10];
+		
+		if (objectArray[objectArray.length - 1] == -995) {
+			byte[] temp = new byte[objectArray.length - 2];
+			for (int i = 0; i < objectArray.length - 2; i++)
+				temp[i] = objectArray[i];
+			objectArray = temp;
+		}
+		
 		return objectArray;
 	}
 
