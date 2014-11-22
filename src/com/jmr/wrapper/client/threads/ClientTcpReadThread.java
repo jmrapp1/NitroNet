@@ -45,7 +45,6 @@ public class ClientTcpReadThread implements Runnable {
 		try {
 			ObjectInputStream in = new ObjectInputStream(serverConnection.getSocket().getInputStream());
 			while (!serverConnection.getSocket().isClosed() && in != null) {
-				
 				/** Get all data from the packet that was sent. */
 				byte[] data = new byte[client.getConfig().PACKET_BUFFER_SIZE];
 				in.readFully(data);
@@ -59,7 +58,6 @@ public class ClientTcpReadThread implements Runnable {
 				
 				/** Return the object in bytes from the sent packet. */
 				byte[] objectArray = getObjectFromPacket(data);
-				
 				if (objectArray[0] == 99) { //Complex object
 					int id = getIdFromComplex(objectArray);
 					int pieceAmount = getPieceAmountFromComplex(objectArray);
@@ -85,6 +83,7 @@ public class ClientTcpReadThread implements Runnable {
 				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			serverConnection.close();
 			client.executeThread(new DisconnectedThread((SocketListener)client.getListener(), serverConnection));
 		}
@@ -136,13 +135,15 @@ public class ClientTcpReadThread implements Runnable {
 	private int findSizeOfObject(byte[] data) {
 		int count = 0;
 		int index = -1;
+		int checkIndex = 30;
 		for (int i = 0; i < data.length; i++) {
 			byte val = data[i];
 			if (val == 0) {
-				if (count >= 20) {
+				if (count >= data.length - checkIndex) {
 					break;
 				} else if (count == 0) {
 					index = i;
+					checkIndex = i;
 				}
 				count++;
 			} else {

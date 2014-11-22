@@ -39,11 +39,13 @@ public class PingThread implements Runnable {
 	public void run() {
 		try {
 			while (!con.getSocket().isClosed()) {
+				//System.out.println("Pinging " + con.getAddress());
 				String s = "TestAlivePing";
 				con.sendTcp(s);
 				Thread.sleep(((ServerConfig)server.getConfig()).PING_SLEEP_TIME);
 			}
 		} catch (NullPointerException | InterruptedException e) {
+			System.out.println("Connection closed.");
 			server.executeThread(new DisconnectedThread((SocketListener)server.getListener(), con));
 			ConnectionManager.getInstance().close(con);
 		}

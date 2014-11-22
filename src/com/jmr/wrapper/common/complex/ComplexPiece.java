@@ -56,8 +56,10 @@ public class ComplexPiece {
 	 */
 	public void sendTcp(ObjectOutputStream tcpOut) {
 		try {
-			tcpOut.write(data);
-			tcpOut.flush();
+			synchronized(tcpOut) {
+				tcpOut.write(data);
+				tcpOut.flush();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

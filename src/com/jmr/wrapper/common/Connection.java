@@ -7,13 +7,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 
-import com.jmr.wrapper.client.Client;
 import com.jmr.wrapper.common.complex.ComplexObject;
+import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.server.ConnectionManager;
-import com.jmr.wrapperx.client.HttpConnection;
 
 /**
  * Networking Library
@@ -101,6 +98,10 @@ public class Connection implements IConnection {
 		return port;
 	}
 	
+	public boolean isConnected() {
+		return udpSocket != null && socket != null && socket.isConnected() && socket.isBound() && !socket.isClosed();
+	}
+	
 	/** Sends an object over the UDP socket.
 	 * @param object The object to send.
 	 */
@@ -118,6 +119,8 @@ public class Connection implements IConnection {
 			objOut.close();
 			byteOutStream.close();
 		} catch (IOException e) {
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
 			ConnectionManager.getInstance().close(this);
 			e.printStackTrace();
 		}
@@ -131,25 +134,32 @@ public class Connection implements IConnection {
 			DatagramPacket sendPacket = new DatagramPacket(data, data.length, address, port);
 			udpSocket.send(sendPacket);
 		} catch (IOException e) {
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
 			ConnectionManager.getInstance().close(this);
 			e.printStackTrace();
 		}
 	}
 	
-	
 	/** Sends an object over the TCP socket.
 	 * @param object The object to send.
-	 */
+	 */	
 	public void sendTcp(Object object) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
 			byte[] data = ConnectionUtils.getByteArray(protocol, byteOutStream, object);
-			tcpOut.write(data);
-			tcpOut.flush();
+			objOut.close();
+			byteOutStream.close();
+			synchronized(tcpOut) {
+				tcpOut.write(data);
+				tcpOut.flush();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
 			ConnectionManager.getInstance().close(this);
 		}
 	}
@@ -159,10 +169,14 @@ public class Connection implements IConnection {
 	 */
 	public void sendTcp(byte[] data) {
 		try {
-			tcpOut.write(data);
-			tcpOut.flush();
+			synchronized(tcpOut) {
+				tcpOut.write(data);
+				tcpOut.flush();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
 			ConnectionManager.getInstance().close(this);
 		}
 	}
@@ -180,6 +194,8 @@ public class Connection implements IConnection {
 			new ComplexObject(data, checksum, protocol).sendTcp(tcpOut);
 		} catch (IOException e) {
 			e.printStackTrace();
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
 			ConnectionManager.getInstance().close(this);
 		}
 	}
@@ -206,6 +222,8 @@ public class Connection implements IConnection {
 			new ComplexObject(data, checksum, protocol, splitAmount).sendTcp(tcpOut);
 		} catch (IOException e) {
 			e.printStackTrace();
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
 			ConnectionManager.getInstance().close(this);
 		}
 	}
@@ -222,6 +240,22 @@ public class Connection implements IConnection {
 	/** Sends a complex object over UDP.
 	 * @param object The object to send.
 	 */
+	public void sendComplexObjectUdp(Object object, int splitAmount) {
+		try {
+			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
+			objOut.writeObject(object);
+			byte[] checksum = ConnectionUtils.getChecksum(byteOutStream.toByteArray());
+			byte[] data = ConnectionUtils.getCompressedByteArray(protocol, byteOutStream, object);
+			new ComplexObject(data, checksum, protocol, splitAmount).sendUdp(udpSocket, address, port);
+		} catch (IOException e) {
+			e.printStackTrace();
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
+			ConnectionManager.getInstance().close(this);
+		}
+	}
+	
 	public void sendComplexObjectUdp(Object object) {
 		try {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -232,6 +266,8 @@ public class Connection implements IConnection {
 			new ComplexObject(data, checksum, protocol).sendUdp(udpSocket, address, port);
 		} catch (IOException e) {
 			e.printStackTrace();
+			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
+				((SocketListener)protocol.getListener()).disconnected(this);
 			ConnectionManager.getInstance().close(this);
 		}
 	}

@@ -4,10 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-
-import javax.swing.JOptionPane;
 
 import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.IProtocol;
@@ -123,23 +123,22 @@ public class UdpHandleThread implements Runnable {
 	private int findSizeOfObject(byte[] data) {
 		int count = 0;
 		int index = -1;
+		int checkIndex = 30;
 		for (int i = 0; i < data.length; i++) {
 			byte val = data[i];
 			if (val == 0) {
-				if (count >= 30) {
+				if (count >= data.length - checkIndex) {
 					break;
 				} else if (count == 0) {
 					index = i;
+					checkIndex = i;
 				}
 				count++;
 			} else {
 				count = 0;
 			}
 		}
-		if (count >= 20)
-			return index;
-		else
-			return -1;
+		return index;
 	}
 
 	/** Takes the byte array of an object and gets the checksum from it.
@@ -163,6 +162,7 @@ public class UdpHandleThread implements Runnable {
 	 * @return The new array of data.
 	 */
 	private byte[] copyArray(byte[] src, int arraySize, int start) {
+		System.out.println("ArraySize: " + arraySize);
 		byte[] ret = new byte[arraySize];
 		for (int i = 0; i < arraySize; i++)
 			ret[i] = src[i + start];
@@ -180,7 +180,29 @@ public class UdpHandleThread implements Runnable {
 		int size = findSizeOfObject(idArray);
 		idArray = copyArray(idArray, size, 0);
 		String id = new String(idArray);
+		id = removeSquares(id);
+
 		return Integer.valueOf(id);
+	}
+	
+	private String removeSquares(String str) {
+		String newStr = "";
+		for (int i = 0; i < str.length(); i++) {
+			char c = getNumber(str.substring(i, i + 1));
+			if (c != 0) {
+				newStr += c;
+			}
+		}
+		return newStr;
+	}
+	
+	private char getNumber(String s) {
+		try {
+			Integer.parseInt(s);
+			return s.charAt(0);
+		} catch (Exception e) {
+			return (char)0;
+		}
 	}
 	
 	/** Gets the amount of pieces in the complex object.
@@ -192,6 +214,7 @@ public class UdpHandleThread implements Runnable {
 		int size = findSizeOfObject(amountArray);
 		amountArray = copyArray(amountArray, size, 0);
 		String pieceAmount = new String(amountArray);
+		pieceAmount = removeSquares(pieceAmount);
 		return Integer.valueOf(pieceAmount);
 	}
 	

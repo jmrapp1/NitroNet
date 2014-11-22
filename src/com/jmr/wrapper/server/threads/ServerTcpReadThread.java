@@ -50,11 +50,11 @@ public class ServerTcpReadThread implements Runnable {
 	
 	@Override
 	public void run() {
-		try {
-			while(!con.getSocket().isClosed() && in != null) {
-				
+		byte[] data = null;
+		while(!con.getSocket().isClosed() && in != null) {
+			try {
 				/** Get all data from the packet that was sent. */
-				byte[] data = new byte[server.getConfig().PACKET_BUFFER_SIZE];
+				data = new byte[server.getConfig().PACKET_BUFFER_SIZE];
 				in.readFully(data);
 				
 				/** Decrypt the data if the encryptor is set. */
@@ -66,41 +66,44 @@ public class ServerTcpReadThread implements Runnable {
 				
 				/** Return the object in bytes from the sent packet. */
 				byte[] objectArray = getObjectFromPacket(data);
-				
-				if (objectArray[0] == 99) { //Complex object
-					int id = getIdFromComplex(objectArray);
-					int pieceAmount = getPieceAmountFromComplex(objectArray);
-					objectArray = getObjectFromComplex(objectArray);
-					ReceivedComplexPiece piece = new ReceivedComplexPiece(checksumSent, id, pieceAmount, objectArray);
-					ComplexManager.getInstance().handlePiece(piece, con);
-				} else {
-				
-					/** Get the checksum value of the object array. */
-					String checksumVal = getChecksumOfObject(objectArray);
+				if (objectArray != null) {
 					
-					/** Get the object from the bytes. */
-					ByteArrayInputStream objIn = new ByteArrayInputStream(objectArray);
-					ObjectInputStream is = new ObjectInputStream(objIn);
-					Object object = is.readObject();
-					
-					/** Check if the checksums are equal. If they aren't it means the packet was edited or didn't send completely. */
-					if (checksumSent.equals(checksumVal)) {
-						if (!(object instanceof String)) {
-							server.executeThread(new ReceivedThread(server.getListener(), con, object));
-						} else if (!((String) object).equalsIgnoreCase("ConnectedToServer") && !((String)object).equalsIgnoreCase("TestAlivePing")) {
-							server.executeThread(new ReceivedThread(server.getListener(), con, object));
-						}
+					if (objectArray[0] == 99) { //Complex object
+						int id = getIdFromComplex(objectArray);
+						int pieceAmount = getPieceAmountFromComplex(objectArray);
+						objectArray = getObjectFromComplex(objectArray);
+						ReceivedComplexPiece piece = new ReceivedComplexPiece(checksumSent, id, pieceAmount, objectArray);
+						ComplexManager.getInstance().handlePiece(piece, con);
 					} else {
-						con.addPacketLoss();
+					
+						/** Get the checksum value of the object array. */
+						String checksumVal = getChecksumOfObject(objectArray);
+						
+						/** Get the object from the bytes. */
+						ByteArrayInputStream objIn = new ByteArrayInputStream(objectArray);
+						ObjectInputStream is = new ObjectInputStream(objIn);
+						Object object = is.readObject();
+						
+						/** Check if the checksums are equal. If they aren't it means the packet was edited or didn't send completely. */
+						if (checksumSent.equals(checksumVal)) {
+							if (!(object instanceof String)) {
+								server.executeThread(new ReceivedThread(server.getListener(), con, object));
+							} else if (!((String) object).equalsIgnoreCase("ConnectedToServer") && !((String)object).equalsIgnoreCase("TestAlivePing")) {
+								server.executeThread(new ReceivedThread(server.getListener(), con, object));
+							}
+						} else {
+							con.addPacketLoss();
+						}
+						is.close();
+						objIn.close();
 					}
-					is.close();
-					objIn.close();
 				}
+			} catch (IOException | ClassNotFoundException e) { //disconnected
+				e.printStackTrace();
+				server.executeThread(new DisconnectedThread((SocketListener)server.getListener(), con));
+				ConnectionManager.getInstance().close(con);
+				in = null;
 			}
-		} catch (NullPointerException | IOException | ClassNotFoundException e) { //disconnected
-			server.executeThread(new DisconnectedThread((SocketListener)server.getListener(), con));
-			ConnectionManager.getInstance().close(con);
-			in = null;
 		}
 	}
 		
@@ -110,24 +113,32 @@ public class ServerTcpReadThread implements Runnable {
 	 * @return The object in a byte array.
 	 */
 	private byte[] getObjectFromPacket(byte[] data) {
-		/** Find the size of the data. Gets rid of all extra null values. */
-		int index = findSizeOfObject(data);		
-		
-		/** Create the byte array to store the object. Size is the size of the data array minus the size of the checksum. */
-		byte[] objectArray = new byte[index - 10];
-		
-		/** Get the object and put the bytes into a separate array. */
-		for (int i = 0; i < objectArray.length; i++)
-			objectArray[i] = data[i + 10];
-		
-		if (objectArray[objectArray.length - 1] == -995) {
-			byte[] temp = new byte[objectArray.length - 2];
-			for (int i = 0; i < objectArray.length - 2; i++)
-				temp[i] = objectArray[i];
-			objectArray = temp;
+		int index = 0;
+		try {
+			/** Find the size of the data. Gets rid of all extra null values. */
+			index = findSizeOfObject(data);		
+			
+			//if (index > 10) {
+				/** Create the byte array to store the object. Size is the size of the data array minus the size of the checksum. */
+				byte[] objectArray = new byte[index - 10];
+				
+				/** Get the object and put the bytes into a separate array. */
+				for (int i = 0; i < objectArray.length; i++)
+					objectArray[i] = data[i + 10];
+				
+				if (objectArray[objectArray.length - 1] == -995) {
+					byte[] temp = new byte[objectArray.length - 2];
+					for (int i = 0; i < objectArray.length - 2; i++)
+						temp[i] = objectArray[i];
+					objectArray = temp;
+				}
+				//I love tetyana Martynyuk
+				return objectArray;
+			//} 
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		return objectArray;
+		return null;
 	}
 	
 	/** Gets the first 10 bytes of the data, which is the checksum, and converts it to a string.
@@ -149,13 +160,15 @@ public class ServerTcpReadThread implements Runnable {
 	private int findSizeOfObject(byte[] data) {
 		int count = 0;
 		int index = -1;
+		int checkIndex = 30;
 		for (int i = 0; i < data.length; i++) {
 			byte val = data[i];
 			if (val == 0) {
-				if (count >= 20) {
+				if (count >= data.length - checkIndex) {
 					break;
 				} else if (count == 0) {
 					index = i;
+					checkIndex = i;
 				}
 				count++;
 			} else {

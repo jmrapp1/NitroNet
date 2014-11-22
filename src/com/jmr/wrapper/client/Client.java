@@ -171,7 +171,7 @@ public class Client implements IProtocol {
 	
 	@Override
 	public boolean isConnected() {
-		return udpSocket != null && tcpSocket != null && tcpSocket.isConnected();
+		return udpSocket != null && tcpSocket != null && tcpSocket.isConnected() && tcpSocket.isBound() && !tcpSocket.isClosed();
 	}
 	
 	@Override
