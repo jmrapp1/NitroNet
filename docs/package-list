@@ -1,0 +1,16 @@
+com.jmr.wrapper.client
+com.jmr.wrapper.client.threads
+com.jmr.wrapper.common
+com.jmr.wrapper.common.complex
+com.jmr.wrapper.common.config
+com.jmr.wrapper.common.exceptions
+com.jmr.wrapper.common.listener
+com.jmr.wrapper.common.sql
+com.jmr.wrapper.common.threads
+com.jmr.wrapper.common.utils
+com.jmr.wrapper.encryption
+com.jmr.wrapper.server
+com.jmr.wrapper.server.threads
+com.jmr.wrapperx.client
+com.jmr.wrapperx.common
+com.jmr.wrapperx.server
