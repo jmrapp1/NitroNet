@@ -1,6 +1,6 @@
 Video tutorials
 =================
-I have created a series of video tutorials explaining how to use NitroNet if you would rather learn from listeneing and watching me than from reading text tutorials.
+I have created a series of video tutorials explaining how to use NitroNet if you would rather learn from listening and watching me than from reading text tutorials.
 
 You can find the playlist of the videos [here](https://www.youtube.com/playlist?list=PLGe6xqcK3kWHvy1IRAIbe2UaN5stGoBNG) but I'll place each individually below.
 
