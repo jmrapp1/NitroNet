@@ -161,7 +161,7 @@ public class ClientStarter {
 }
 ```
 
-You will see the correct strings be outputed and you will also see a string being received called "TestAlivePing". This is a small packet sent to the client to test on the server side whether or not you are still connected. You may just ignore this packet. 
+You will see the correct strings be outputed and you will also see a string being received called "TestAlivePing". This is a small packet sent to the client to test on the server side whether or not you are still connected. You can just ignore this packet. 
 
 We have now setup the basis of a functional server and client.
 
@@ -216,7 +216,7 @@ public class ClientStarter {
 }
 ```
 
-The getter method "getServerConnection()" from Client returns the instance of the server connection object. From here you can send objects or bytes of data over to the server.
+The getter method "getServerConnection()" from Client returns the instance of the server connection object. From here you can send packets of data over to the server.
 
 Lets see how we can now send information back to clients from the server. 
 
@@ -240,10 +240,100 @@ public class ServerListener implements SocketListener {
 	}
 	
 }
-
 ```
 
 So now when a packet is received on the server side it will send back a string over UDP letting them know!
 
 Sending Custom Objects
 ======================
+You may be asking how you can send custom objects over TCP and UDP because strings arent all that helpful. When sending an object over a stream you need to serialize it to allow it to be broken down into bytes and be sent. For your own objects this is very simple, they just need to implement the Serializable interface.
+
+```java
+package packet;
+import java.io.Serializable;
+
+public class MyObject implements Serializable{
+	
+}
+```
+
+After that is done you can add any data you'd like into the object **as long as the data is serializeable as well**. What I mean by this is if you want to send a BufferedImage over the network and you add an instance variable into the object, it will not send and will throw an error because the BufferedImage object is not serializeable. In these cases the best option is to get the raw bytes from the object and add those into the object instead.
+
+So lets send some information over the network. Before we start it is important to make sure these two things are true when sending an object over the network:
+
+1. That the object on the client and server side is exactly the same. If the code of the object on one side is different from the code on the other side, it will not receive the object.
+
+2. That the object being sent is in the same package on the server and clent side. So if you have two projects, one for the server and one for the client, and the object on the client side is in package "com.client.packets" and on the server side is in the package "com.server.packets", your program will throw an error because the packages are different. Simply make them reside in the same package like "com.network.packets".
+
+If atleast one of these cases is not true your program will throw errors. 
+
+Now lets continue working on our object and send data. We will add some instance variables to the MyObject class with a constructor to set the values of those variables.
+
+```java
+package packet;
+
+import java.io.Serializable;
+
+public class MyObject implements Serializable{
+
+	public String message;
+	
+	public MyObject(String message) {
+		this.message = message;
+	}
+	
+}
+```
+
+This object will hold a message that is sent to either the server or the client. What we'll do on each side is go to the received method and add in code to extract the message from the object. First we'll start by going to the ServerListener class and modifying the received method.
+
+```java
+public class ServerListener implements SocketListener {
+
+	@Override
+	public void received(Connection con, Object object) {
+		if (object instanceof MyObject) {
+			MyObject myObj = (MyObject) object;
+			System.out.println(myObj.message);
+		}
+	}
+
+	@Override
+	public void connected(Connection con) {
+		System.out.println("New client connected.");
+	}
+
+	@Override
+	public void disconnected(Connection con) {
+		System.out.println("Client has disconnected.");
+	}
+	
+}
+```
+
+This code is pretty self explanatory but I will go through it to make sure you understand what is going on. When a new packet is received we first check to see if that packet is an instance of the MyObject class. If it is we cast the object to the MyObject class and print the message that was stored in the object. Now lets go to the client side and send the object over to the server
+
+```java
+public class ClientStarter {
+
+	private final Client client;
+	
+	public ClientStarter() {
+		client = new Client("localhost", 4395, 4395);
+		client.setListener(new ClientListener());
+		client.connect();
+		if (client.isConnected()) {
+			System.out.println("Connected to the server.");
+			client.getServerConnection().sendTcp(new MyObject("Hello from NitroNet!");
+		}
+	}
+	
+	public static void main(String[] args) {
+		new ClientStarter();
+	}
+	
+}
+```
+
+Now if you run the server and then the client the server will print out the message "Hello from NitroNet!".
+
