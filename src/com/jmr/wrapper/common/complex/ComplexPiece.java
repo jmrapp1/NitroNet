@@ -9,6 +9,7 @@ import java.net.InetAddress;
 
 import com.jmr.wrapper.client.Client;
 import com.jmr.wrapper.common.IProtocol;
+import com.jmr.wrapper.common.utils.PacketUtils;
 import com.jmr.wrapperx.client.HttpPostThread;
 import com.jmr.wrapperx.server.HttpSendThread;
 
@@ -101,13 +102,13 @@ public class ComplexPiece {
 	 */
 	private byte[] getByteArray(byte[] data) {
 		byte[] indexArray = new byte[4]; //holds the ID amount
-		copyArrayToArray(String.valueOf(id).getBytes(), indexArray, 0); //Puts the ID into the array of 4 bytes
+		copyArrayToArray(PacketUtils.intToByteArray(id), indexArray, 0); //Puts the ID into the array of 4 bytes
 		
 		byte[] pieceAmountArray = new byte[4];
-		copyArrayToArray(String.valueOf(pieceAmount).getBytes(), pieceAmountArray, 0); //Puts the ID into the array of 4 bytes
+		copyArrayToArray(PacketUtils.intToByteArray(pieceAmount), pieceAmountArray, 0); //Puts the ID into the array of 4 bytes
 		
 		byte[] dataSizeArray = new byte[4];
-		copyArrayToArray(String.valueOf(data.length).getBytes(), dataSizeArray, 0); //Puts the ID into the array of 4 bytes
+		copyArrayToArray(PacketUtils.intToByteArray(data.length), dataSizeArray, 0); //Puts the ID into the array of 4 bytes
 		
 		byte[] ret = new byte[data.length + 1 + indexArray.length + pieceAmountArray.length + dataSizeArray.length];
 		
@@ -143,8 +144,11 @@ public class ComplexPiece {
 	 * @param startIndex The index in the array of "dest" to start at.
 	 */
 	private void copyArrayToArray(byte[] src, byte[] dest, int startIndex) {
-		for (int i = 0; i < src.length; i++) {
-			dest[i + startIndex] = src[i];
+		for (int i = 0; i < dest.length; i++) {
+			if (i < src.length)
+				dest[i + startIndex] = src[i];
+			else
+				break;
 		}
 	}
 	

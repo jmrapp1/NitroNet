@@ -18,9 +18,10 @@ public class PacketUtils {
 	public static int getIdFromComplex(byte[] data) {
 		byte[] idArray = copyArray(data, 4, 1);
 		int size = findSizeOfObject(idArray);
+		if (size == 0)
+			return 0;
 		idArray = copyArray(idArray, size, 0);
-		String id = new String(idArray);
-		return Integer.valueOf(id);
+		return intfromByteArray(idArray);
 	}
 	
 	/** Gets the size of a complex object. 
@@ -31,8 +32,7 @@ public class PacketUtils {
 		byte[] sizeArray = copyArray(data, 4, 1 + 4 + 4); //first byte is for the complex ID, next 4 is the ID, next 4 is the piece amount
 		int size = findSizeOfObject(sizeArray);
 		sizeArray = copyArray(sizeArray, size, 0);
-		String sizeStr = new String(sizeArray);
-		return Integer.valueOf(sizeStr);
+		return intfromByteArray(sizeArray);
 	}
 	
 	/** Gets the amount of pieces in the complex object.
@@ -43,8 +43,7 @@ public class PacketUtils {
 		byte[] amountArray = copyArray(data, 4, 1 + 4); //first byte is for the complex ID, next 4 is the ID
 		int size = findSizeOfObject(amountArray);
 		amountArray = copyArray(amountArray, size, 0);
-		String pieceAmount = new String(amountArray);
-		return Integer.valueOf(pieceAmount);
+		return intfromByteArray(amountArray);
 	}
 	
 	/** Gets the object from a complex piece.
@@ -195,6 +194,12 @@ public class PacketUtils {
 		return concat;
 	}
 	
+	/** Handles an incoming complex piece by getting its information and passing it on.
+	 * 
+	 * @param checksumSent The checksum to check against
+	 * @param objectArray The array of data
+	 * @param con The connection it came from
+	 */
 	public static void handleComplexPiece(String checksumSent, byte[] objectArray, IConnection con) {
 		int id = getIdFromComplex(objectArray);
 		int dataSize = getSizeFromComplex(objectArray);
@@ -204,6 +209,28 @@ public class PacketUtils {
 		objectArray = getObjectFromComplex(objectArray);
 		ReceivedComplexPiece piece = new ReceivedComplexPiece(checksumSent, id, pieceAmount, objectArray, dataSize);
 		ComplexManager.getInstance().handlePiece(piece, con);
+	}
+	
+	/** Converts and integer to a 4 byte long array.
+	 * 
+	 * @param value The integer
+	 * @return 4 byte long array
+	 */
+	public static byte[] intToByteArray(int value) {
+	    return new byte[] {
+	            (byte)(value >>> 24),
+	            (byte)(value >>> 16),
+	            (byte)(value >>> 8),
+	            (byte)value};
+	}
+	
+	/** Converts a 4 byte long array to an integer.
+	 * 
+	 * @param bytes The byte array
+	 * @return The integer
+	 */
+	public static int intfromByteArray(byte[] bytes) {
+	     return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
 	}
 	
 }
