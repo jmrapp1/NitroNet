@@ -311,7 +311,7 @@ public class ServerListener implements SocketListener {
 }
 ```
 
-This code is pretty self explanatory but I will go through it to make sure you understand what is going on. When a new packet is received we first check to see if that packet is an instance of the MyObject class. If it is we cast the object to the MyObject class and print the message that was stored in the object. Now lets go to the client side and send the object over to the server
+This code is pretty self explanatory but I will go through it to make sure you understand what is going on. When a new packet is received we first check to see if that packet is an instance of the MyObject class. If it is we cast the object to the MyObject class and print the message that was stored in the object. Now lets go to the client side and send the object over to the server.
 
 ```java
 public class ClientStarter {
@@ -337,3 +337,44 @@ public class ClientStarter {
 
 Now if you run the server and then the client the server will print out the message "Hello from NitroNet!".
 
+Server and Client Configuration Settings
+========================================
+Both the Server and Client classes have configuration settings which, as of the most recent update, only have three options. The Server side has 2 options that you can modify:
+
+1. Whether or not to ping connected clients to ensure they're connected. By default this is true and I recommend you leave it as that.
+
+2. The time between each ping. By default it is 5000 milliseconds (5 seconds).
+
+There is also 1 more option that both the Client and Server have that is important to understand:
+
+1. The packet buffer size of the packets to be sent over TCP and UDP. By default the packet sizes are set to 2048 bytes. The highest amount that TCP and UDP protocol allows is 64,000 bytes. Say that you leave the size as 2048 bytes but you try to send an object that is 5000 bytes. It will throw an error because the object is larger than the buffer size. You may be wondering what to do if the byte size is over 64,000 and I will explain the solution in the next section.
+
+To edit the configuration settings all you need to do is get the config instance from the Server or Client.
+
+```java
+client.getConfig().PACKET_BUFFER_SIZE = 32000;
+```
+
+```java
+((ServerConfig)server.getConfig()).PACKET_BUFFER_SIZE = 32000;
+((ServerConfig)server.getConfig()).PING_CLIENTS = false;
+((ServerConfig)server.getConfig()).PING_SLEEP_TIME = 3000;
+```
+
+When changing the PACKET_BUFFER_SIZE you need to make sure that both buffer sizes are the same. Technically this isn't required but will prevent future issues. For example say you set the buffer size to 5000 on the Client and 2500 on the Server. Then say you sent an object from the Client that is 3000 bytes. It will send on the client side because it is under 5000 bytes but it will not receive on the server side because it is less than 3000 bytes. So I recommend to just be safe and set them to the same value.
+
+Complex Objects/Packet Streaming
+================================
+Say that you're trying to send a very large object larger than 64,000 bytes. You can't just send it over the stream because it is too large. NitroNet implements packet streaming which it refers to as a 'Complex Object'. A Complex Object takes the bytes of an object, splits them into smaller parts, sends them over TCP or UDP, and then reforms the bytes and object on the receiving side. So if we have a 128,000 byte object we can split the object 10 times and send individual packets that are only 12,800 bytes long! I designed this system to be very dynamic and easy to use. All it requires is one method.
+
+```java
+client.getServerConnection().sendComplexObjectTcp(new MyObject("Hello from NitroNet!");
+```
+
+```java
+client.getServerConnection().sendComplexObjectTcp(new MyObject("Hello from NitroNet!", 5);
+```
+
+These two snippets of code take the MyObject instance and go through the process of splitting it up. In the first case it splits the object into 3 parts, by default. In the second case it splits the object into the 5 parts as specified by the second parameter. 
+
+Note that this process does have the drawback of taking a longer amount of time, a few milliseconds or so longer. 
