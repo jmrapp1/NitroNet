@@ -369,10 +369,12 @@ Say that you're trying to send a very large object larger than 64,000 bytes. You
 
 ```java
 client.getServerConnection().sendComplexObjectTcp(new MyObject("Hello from NitroNet!");
+client.getServerConnection().sendComplexObjectUdp(new MyObject("Hello from NitroNet!");
 ```
 
 ```java
 client.getServerConnection().sendComplexObjectTcp(new MyObject("Hello from NitroNet!", 5);
+client.getServerConnection().sendComplexObjectUdp(new MyObject("Hello from NitroNet!", 5);
 ```
 
 These two snippets of code take the MyObject instance and go through the process of splitting it up. In the first case it splits the object into 3 parts, by default. In the second case it splits the object into the 5 parts as specified by the second parameter. 
