@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import com.jmr.wrapper.client.Client;
-import com.jmr.wrapper.common.ConnectionUtils;
 import com.jmr.wrapper.common.IConnection;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexObject;
+import com.jmr.wrapper.common.utils.PacketUtils;
 import com.jmr.wrapperx.client.HttpPostThread;
 import com.jmr.wrapperx.server.HttpSendThread;
 
@@ -92,7 +92,7 @@ public class HttpSession implements IConnection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] data = ConnectionUtils.getByteArray(neSocket, byteOutStream, object);
+			byte[] data = PacketUtils.getByteArray(neSocket, byteOutStream);
 			if (neSocket instanceof Client && url != null) {
 				if (cookie == null)
 					neSocket.executeThread(new Thread(new HttpPostThread((Client)neSocket, url, data)));
@@ -114,8 +114,8 @@ public class HttpSession implements IConnection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] checksum =  ConnectionUtils.getChecksum(byteOutStream.toByteArray());
-			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
+			byte[] checksum =  PacketUtils.getChecksumOfObject(byteOutStream.toByteArray()).getBytes();
+			byte[] data =  PacketUtils.getCompressedByteArray(neSocket, byteOutStream);
 			new ComplexObject(data, checksum, neSocket).sendHttp(url, cookie, out);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -132,8 +132,8 @@ public class HttpSession implements IConnection {
 			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
 			objOut.writeObject(object);
-			byte[] checksum =  ConnectionUtils.getChecksum(byteOutStream.toByteArray());
-			byte[] data =  ConnectionUtils.getCompressedByteArray(neSocket, byteOutStream, object);
+			byte[] checksum =  PacketUtils.getChecksumOfObject(byteOutStream.toByteArray()).getBytes();
+			byte[] data =  PacketUtils.getCompressedByteArray(neSocket, byteOutStream);
 			new ComplexObject(data, checksum, neSocket, splitAmount).sendHttp(url, cookie, out);
 		} catch (IOException e) {
 			e.printStackTrace();

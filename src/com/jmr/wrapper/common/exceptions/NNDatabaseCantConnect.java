@@ -9,9 +9,9 @@ package com.jmr.wrapper.common.exceptions;
  * @version 1.0 7/19/2014
  */
 
-public class NEDatabaseCantConnect extends Exception {
+public class NNDatabaseCantConnect extends Exception {
 	
-	public NEDatabaseCantConnect() {
+	public NNDatabaseCantConnect() {
 		super("Can't make a connection to the database. Make sure all of the parameters are correct.");
 	}
 	

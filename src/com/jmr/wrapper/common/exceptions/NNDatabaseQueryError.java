@@ -9,9 +9,9 @@ package com.jmr.wrapper.common.exceptions;
  * @version 1.0 7/19/2014
  */
 
-public class NEDatabaseQueryError extends Exception {
+public class NNDatabaseQueryError extends Exception {
 	
-	public NEDatabaseQueryError(String message) {
+	public NNDatabaseQueryError(String message) {
 		super("Can not run the query. " + message);
 	}
 	

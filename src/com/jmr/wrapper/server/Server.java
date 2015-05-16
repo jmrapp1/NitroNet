@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
-import com.jmr.wrapper.common.exceptions.NECantStartServer;
+import com.jmr.wrapper.common.exceptions.NNCantStartServer;
 import com.jmr.wrapper.common.listener.IListener;
 import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.encryption.IEncryptor;
@@ -58,22 +58,22 @@ public class Server implements IProtocol {
 	/** Starts a new server on the TCP and UDP port.
 	 * @param tcpPort The TCP port.
 	 * @param udpPort The UDP port.
-	 * @throws NECantStartServer 
+	 * @throws NNCantStartServer 
 	 * @throws UnknownHostException 
 	 */	
-	public Server(int tcpPort, int udpPort) throws NECantStartServer {
+	public Server(int tcpPort, int udpPort) throws NNCantStartServer {
 		serverConfig = new ServerConfig();
 		try {
 			tcpSocket = new ServerSocket(tcpPort, 1, InetAddress.getByName("0.0.0.0"));
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new NECantStartServer();
+			throw new NNCantStartServer();
 		}
 		try {
 			udpSocket = new DatagramSocket(udpPort);
 		} catch (SocketException e) {
 			e.printStackTrace();
-			throw new NECantStartServer();
+			throw new NNCantStartServer();
 		}
 		this.udpPort = udpPort;
 		mainExecutor = Executors.newCachedThreadPool();

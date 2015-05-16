@@ -3,6 +3,7 @@ package com.jmr.wrapper.client;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -95,13 +96,8 @@ public class Client implements IProtocol {
 	public void connect() {
 		try {
 			udpSocket = new DatagramSocket();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-		
-		try {
 			tcpSocket = new Socket(address, tcpPort);
-			tcpSocket.setSoLinger(true, 0);
+			//tcpSocket.connect(address);
 			serverConnection = new Connection(udpPort, tcpSocket, udpSocket);
 			serverConnection.setProtocol(this);
 			ComplexManager.getInstance().setProtocol(this);
@@ -109,9 +105,12 @@ public class Client implements IProtocol {
 				((SocketListener)listener).connected(serverConnection);
 			}
 			ConnectionManager.getInstance().addConnection(serverConnection);
+		} catch (SocketException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	
 		mainExecutor = Executors.newCachedThreadPool();
 		
 		if (tcpSocket != null && tcpSocket.isConnected() && udpSocket != null) {

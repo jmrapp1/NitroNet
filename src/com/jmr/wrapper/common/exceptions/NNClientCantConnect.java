@@ -9,9 +9,9 @@ package com.jmr.wrapper.common.exceptions;
  * @version 1.0 7/19/2014
  */
 
-public class NEClientCantConnect extends Exception {
+public class NNClientCantConnect extends Exception {
 
-	public NEClientCantConnect() {
+	public NNClientCantConnect() {
 		super("Client can't connect to the server at the given IP Address with the given ports.");
 	}
 	

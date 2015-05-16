@@ -28,7 +28,7 @@ public class ComplexObject {
 	private static int ID_INCREMENT = 0;
 	
 	/** The amount of splits to make. */
-	private final int splitAmount;
+	private int splitAmount;
 	
 	/** The object's id. */
 	private final int id;
@@ -70,6 +70,10 @@ public class ComplexObject {
 	/** Splits the object's byte array into pieces and gets them ready to be sent to over the stream. */
 	private void loadPieces() {
 		int bytesPerSend = data.length / splitAmount;
+		if (bytesPerSend <= 10) { //Bytes per send needs to be > 10 so that the checksum can be extracted correctly. If not, change the split amount.
+			splitAmount = data.length / 11;
+			bytesPerSend = 11;
+		}
 		int extra = 0;
 		int pieceAmount = splitAmount;
 		

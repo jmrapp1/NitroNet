@@ -21,6 +21,9 @@ public class ReceivedComplexPiece implements Comparable<ReceivedComplexPiece>{
 	/** The amount of pieces in the object. */
 	private final int pieceSize;
 	
+	/** The exact data size */
+	private final int dataSize;
+	
 	/** The piece of data from the complex object. */
 	private final byte[] data;
 	
@@ -29,12 +32,14 @@ public class ReceivedComplexPiece implements Comparable<ReceivedComplexPiece>{
 	 * @param id The ID of the piece.
 	 * @param pieceSize The amount of pieces in the object.
 	 * @param data The piece of data.
+	 * @param dataSize The size of the data.
 	 */
-	public ReceivedComplexPiece(String checksum, int id, int pieceSize, byte[] data) {
+	public ReceivedComplexPiece(String checksum, int id, int pieceSize, byte[] data, int dataSize) {
 		this.checksum = checksum;
 		this.id = id;
 		this.pieceSize = pieceSize;
 		this.data = data;
+		this.dataSize = dataSize;
 	}
 	
 	/** @return The checksum of the complex object. */
@@ -47,10 +52,15 @@ public class ReceivedComplexPiece implements Comparable<ReceivedComplexPiece>{
 		return id;
 	}
 	
-	/** @return The amonut of pieces in the complex object. */
+	/** @return The amount of pieces in the complex object. */
 	public int getPieceSize() {
 		return pieceSize;
 	}
+	
+	/** @return The size of the data without the ID's in the front. */
+	public int getDataSize() {
+		return dataSize;
+	}	
 	
 	/** @return The piece of data of the object. */
 	public byte[] getData() {

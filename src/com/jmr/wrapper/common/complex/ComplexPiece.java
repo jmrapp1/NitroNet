@@ -100,13 +100,22 @@ public class ComplexPiece {
 	 * @return The combined array.
 	 */
 	private byte[] getByteArray(byte[] data) {
-		byte[] indexArray = String.valueOf(id).getBytes();
-		byte[] pieceAmountArray = String.valueOf(pieceAmount).getBytes();
-		byte[] ret = new byte[data.length + 9];
-		ret[0] = 99; //Used to determine on the server/client side if the packet sent is part of a complex objects
-		copyArrayToArray(indexArray, ret, 1);
-		copyArrayToArray(pieceAmountArray, ret, 5);
-		copyArrayToArray(data, ret, 9);
+		byte[] indexArray = new byte[4]; //holds the ID amount
+		copyArrayToArray(String.valueOf(id).getBytes(), indexArray, 0); //Puts the ID into the array of 4 bytes
+		
+		byte[] pieceAmountArray = new byte[4];
+		copyArrayToArray(String.valueOf(pieceAmount).getBytes(), pieceAmountArray, 0); //Puts the ID into the array of 4 bytes
+		
+		byte[] dataSizeArray = new byte[4];
+		copyArrayToArray(String.valueOf(data.length).getBytes(), dataSizeArray, 0); //Puts the ID into the array of 4 bytes
+		
+		byte[] ret = new byte[data.length + 1 + indexArray.length + pieceAmountArray.length + dataSizeArray.length];
+		
+		ret[0] = 99; //1st Byte, Used to determine on the server/client side if the packet sent is part of a complex objects
+		copyArrayToArray(indexArray, ret, 1); //2nd byte
+		copyArrayToArray(pieceAmountArray, ret, 1 + indexArray.length);
+		copyArrayToArray(dataSizeArray, ret, 1 + indexArray.length + pieceAmountArray.length);
+		copyArrayToArray(data, ret, 1 + indexArray.length + pieceAmountArray.length + dataSizeArray.length);
 		ret = addArrays(ret, checksum);
 		return ret;
 	}
@@ -118,7 +127,6 @@ public class ComplexPiece {
 	 */
 	private byte[] addArrays(byte[] array, byte[] checksumBytes) {
 		byte[] concat = new byte[protocol.getConfig().PACKET_BUFFER_SIZE];
-		System.out.println(id + ": " + pieceAmount + " - " + protocol.getConfig().PACKET_BUFFER_SIZE + " - " + array.length + " - " + checksumBytes.length);
 		System.arraycopy(checksumBytes, 0, concat, 0, checksumBytes.length);
 		System.arraycopy(array, 0, concat, checksumBytes.length, array.length);
 		

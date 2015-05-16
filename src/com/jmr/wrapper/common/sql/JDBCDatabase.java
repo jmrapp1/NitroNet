@@ -7,8 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.jmr.wrapper.common.exceptions.NEDatabaseCantConnect;
-import com.jmr.wrapper.common.exceptions.NEDatabaseQueryError;
+import com.jmr.wrapper.common.exceptions.NNDatabaseCantConnect;
+import com.jmr.wrapper.common.exceptions.NNDatabaseQueryError;
 
 /**
  * Networking Library
@@ -33,106 +33,106 @@ public class JDBCDatabase implements IDatabase {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws ClassNotFoundException Thrown when JBDC driver not found.
-	 * @throws NEDatabaseCantConnect  Thrown when can't connect to the database.
+	 * @throws NNDatabaseCantConnect  Thrown when can't connect to the database.
 	 * @throws SQLException
 	 */
-	public JDBCDatabase(String url, String databaseName, String username, String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, NEDatabaseCantConnect {
+	public JDBCDatabase(String url, String databaseName, String username, String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, NNDatabaseCantConnect {
 		Class.forName("com.mysql.jdbc.Driver").newInstance(); 
 		try {
 			dbConnection = DriverManager.getConnection(url + databaseName, username, password);
 		} catch (SQLException e) {
-			throw new NEDatabaseCantConnect();
+			throw new NNDatabaseCantConnect();
 		}
 	}
 	
 	@Override
-	public ResultSet executeQuery(String query) throws NEDatabaseQueryError {
+	public ResultSet executeQuery(String query) throws NNDatabaseQueryError {
 		Statement st = getNewStatement();
 		ResultSet ret = executeQuery(st, query);
 		try {
 			st.close();
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 		return ret;
 	}
 	
 	@Override
-	public ResultSet executeQuery(Statement statement, String query) throws NEDatabaseQueryError {
+	public ResultSet executeQuery(Statement statement, String query) throws NNDatabaseQueryError {
 		try {
 			return statement.executeQuery(query);
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 	}
 	
 	@Override
-	public int executeUpdate(String query) throws NEDatabaseQueryError {
+	public int executeUpdate(String query) throws NNDatabaseQueryError {
 		Statement st = getNewStatement();
 		int ret = executeUpdate(st, query);
 		try {
 			st.close();
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 		return ret;
 	}
 	
 	@Override
-	public int executeUpdate(Statement st, String query) throws NEDatabaseQueryError {
+	public int executeUpdate(Statement st, String query) throws NNDatabaseQueryError {
 		try {
 			return st.executeUpdate(query);
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 	}
 	
 	@Override
-	public int executeUpdate(PreparedStatement st) throws NEDatabaseQueryError {
+	public int executeUpdate(PreparedStatement st) throws NNDatabaseQueryError {
 		try {
 			return st.executeUpdate();
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 	}
 	
 	@Override
-	public ResultSet executeQuery(PreparedStatement st) throws NEDatabaseQueryError {
+	public ResultSet executeQuery(PreparedStatement st) throws NNDatabaseQueryError {
 		try {
 			return st.executeQuery();
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 	}
 	
 	@Override
-	public PreparedStatement getPreparedStatement(String query) throws NEDatabaseQueryError {
+	public PreparedStatement getPreparedStatement(String query) throws NNDatabaseQueryError {
 		try {
 			return dbConnection.prepareStatement(query);
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 	}
 	
 	@Override
-	public int getRowCount(ResultSet rs) throws NEDatabaseQueryError {
+	public int getRowCount(ResultSet rs) throws NNDatabaseQueryError {
 		int rows = 0;
 		try {
 			while (rs.next()) {
 				rows++;
 			}
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 		return rows;
 	}
 		
 	@Override
-	public Statement getNewStatement() throws NEDatabaseQueryError {
+	public Statement getNewStatement() throws NNDatabaseQueryError {
 		try {
 			return dbConnection.createStatement();
 		} catch (SQLException e) {
-			throw new NEDatabaseQueryError(e.getMessage());
+			throw new NNDatabaseQueryError(e.getMessage());
 		}
 	}
 	

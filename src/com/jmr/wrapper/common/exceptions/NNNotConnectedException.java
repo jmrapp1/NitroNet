@@ -10,9 +10,9 @@ package com.jmr.wrapper.common.exceptions;
  * @version 1.0 7/19/2014
  */
 
-public class NotConnectedException extends Exception {
+public class NNNotConnectedException extends Exception {
 
-	public NotConnectedException() {
+	public NNNotConnectedException() {
 		super("Client is not connected through TCP.");
 	}
 	
