@@ -21,12 +21,12 @@ import com.jmr.wrapper.server.threads.TcpAcceptThread;
 import com.jmr.wrapper.server.threads.UdpReadThread;
 
 /**
- * Networking Library
+ * NitroNet
  * Server.java
  * Purpose: Starts the a server and manages the TCP and UDP sockets. Provides
  * methods to send packets over UDP and TCP and it also allows a listener to be set to wait 
  * for new connections, disconnections, and packets. It also provides a method to set the 
- * type of encryption being used if any.
+ * type of encryption being used.
  * 
  * @author Jon R (Baseball435)
  * @version 1.0 7/19/2014
