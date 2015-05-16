@@ -259,7 +259,7 @@ public class MyObject implements Serializable{
 
 After that is done you can add any data you'd like into the object **as long as the data is serializeable as well**. What I mean by this is if you want to send a BufferedImage over the network and you add an instance variable into the object, it will not send and will throw an error because the BufferedImage object is not serializeable. In these cases the best option is to get the raw bytes from the object and add those into the object instead.
 
-So lets send some information over the network. Before we start it is important to make sure these two things are true when sending an object over the network:
+Before we start it is important to make sure these two things are true when sending an object over the network:
 
 1. That the object on the client and server side is exactly the same. If the code of the object on one side is different from the code on the other side, it will not receive the object.
 
