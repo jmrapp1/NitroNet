@@ -10,3 +10,4 @@ You can find the playlist of the videos [here](https://www.youtube.com/playlist?
 4. [Sending Custom Objects ](https://www.youtube.com/watch?v=dS4gPb9yAFI&index=2&list=PLGe6xqcK3kWHvy1IRAIbe2UaN5stGoBNG)
 5. [Creating A Chat Room](https://www.youtube.com/watch?v=RXN9b4ib5fc&index=1&list=PLGe6xqcK3kWHvy1IRAIbe2UaN5stGoBNG)
 6. [Encryption, Packet Corruption, and Config Settings ](https://www.youtube.com/watch?v=XaPZ-r1rIW8&index=6&list=PLGe6xqcK3kWHvy1IRAIbe2UaN5stGoBNG)
+7. [Complex Objects/Packet Streaming ](https://www.youtube.com/watch?v=zGBE2OOnIlQ&list=PLGe6xqcK3kWHvy1IRAIbe2UaN5stGoBNG&index=7)
