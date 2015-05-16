@@ -377,4 +377,4 @@ client.getServerConnection().sendComplexObjectTcp(new MyObject("Hello from Nitro
 
 These two snippets of code take the MyObject instance and go through the process of splitting it up. In the first case it splits the object into 3 parts, by default. In the second case it splits the object into the 5 parts as specified by the second parameter. 
 
-Note that this process does have the drawback of taking a longer amount of time, a few milliseconds or so longer. 
+**Note:** This process does have the drawback of taking a few milliseconds longer.
