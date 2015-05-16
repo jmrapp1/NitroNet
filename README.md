@@ -1,7 +1,7 @@
 NitroNet
 =================
 
-This library is used to simplify networking applications. It is multiplatform, supports UDP, TCP and HTTP, has the ability to implement encryption of packets, includes packet corruption handling, packet streaming, SQL support, and much more. This library will allow you to take full control of any application that needs to have some type of networking aspect implemented in it. 
+This library is used to simplify networking applications. It is multiplatform, supports UDP, TCP and HTTP, has the ability to implement encryption of packets, includes packet corruption handling, packet streaming, SQL support, and much more. This library will allow you to take full control of any application that needs to have some type of networking implemented into it. 
 
 Starting A Server
 =================
@@ -380,3 +380,85 @@ client.getServerConnection().sendComplexObjectUdp(new MyObject("Hello from Nitro
 These two snippets of code take the MyObject instance and go through the process of splitting it up. In the first case it splits the object into 3 parts, by default. In the second case it splits the object into the 5 parts as specified by the second parameter. 
 
 **Note:** This process does have the drawback of taking a few milliseconds longer.
+
+Packet Corruption Handling
+==========================
+When sending bytes over TCP, UDP, or HTTP protocol it is very easy for these packets to be intercepted and edited using 3rd party applications. It could allow hackers to change values that are sent over the network; something that you don't want to happen. This is a huge security hole that most networking libraries don't protect from but one that NitroNet does. NitroNet will be able to tell when an object has been modified and when this happens it will ignore the packet and not allow it to be processed. 
+
+###How it works
+When an object is getting ready to be sent over TCP, UDP, or HTTP protocol, NitroNet breaks the object into bytes and gets its checksum value. A checksum is a value that represents an object based off of it's internal data. A checksum value will always be the same for an object regardless of whether or not the program was restarted or the object was sent over a stream and reformed. NitroNet uses this checksum value to determine whether or not a packet has been edited while being sent over the stream. If the checksum that was sent with the packet does not match the checksum of the formed object on the receiving side, then it will know that the packet has been modified or lost and will ignore it. 
+
+All of this is done in the background of NitroNet and it is nothing that you need to implement yourself. It is just important to know what is happening in the background of your applications.
+
+Packet Encryption
+=================
+The packet corruption handling protects from most hackers changing values but sometimes it is good to add more protection to ensure your application is as secure as possible. NitroNet allows you to implement encryption and decryption of packets when sending and receiving data. I designed this system to be very dynamic and easy to use and it is done by just implementing the IEncryptor interface and setting the instance of the class to the Client and Server. 
+
+```java
+public class BasicEncryptor implements IEncryptor {
+
+	@Override
+	public byte[] encrypt(byte[] data) {
+		return data;
+	}
+
+	@Override
+	public byte[] decrypt(byte[] data) {
+		return data;
+	}
+
+	
+}
+```
+
+The IEncryptor interface has two different methods: encrypt and decrypt. Before a packet is sent over TCP, UDP, or HTTP protocol it will always pass the data through the encrypt method first. Then when it is received it will pass the received bytes through the decrypt method. The BasicEncryptor class only returns the data unchanged but you can do whatever you'd like with the bytes to create a form of encryption. We will make it so that every byte value is incremented by 1 in the encrypt method and then it will decrement every byte value by 1 in the decrypt method. 
+
+```java
+public class BasicEncryptor implements IEncryptor {
+
+	@Override
+	public byte[] encrypt(byte[] data) {
+		for (int i = 0; i < data.length; i++) {
+			data[i] += 1;
+		}
+		return data;
+	}
+
+	@Override
+	public byte[] decrypt(byte[] data) {
+		for (int i = 0; i < data.length; i++) {
+			data[i] -= 1;
+		}
+		return data;
+	}
+	
+}
+```
+
+This is a very basic form of encryption but it is done to give you an example of how to implement your own custom encryption method. Now all we need to do is set the encryption method to the Server and Client.
+
+```java
+client.setEncryptionMethod(new BasicEncryptor());
+```
+
+```java
+server.setEncryptionMethod(new BasicEncryptor());
+```
+
+After that any data coming in and out of the client and server will be encrypted and decrypted every time.
+
+SQL Support
+===========
+NitroNet has a simple interface that allows for database integration. It includes the IDatabase interface with methods used to extract and insert data to and from a database. I [implemented the interface for JDBC connection](https://github.com/baseball435/NitroNet/blob/master/src/com/jmr/wrapper/common/sql/JDBCDatabase.java) but by using the IDatabase interface you can add more implementations as needed.
+
+I will give a quick example of how to use the JDBC implementation to connect to a database. The methods implemented from the IDatabase interface will then give you what you need to perform queries on the database. All you need to do is create an instance of the JDBCDatabase class.
+
+```java
+try {
+	JDBCDatabase db = new JDBCDatabase("localhost", "myDatabase", "username", "password");
+} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NNDatabaseCantConnect e) {
+	e.printStackTrace();
+}
+```
+
+We create a new instance of JDBCDatabase and give the appropriate parameters to connect to the database. The first parameter is the URL, the second is the database name, the third is the username to connect to the database, and the fourth is the password. From there you can use the methods given to perform queries on the database.
