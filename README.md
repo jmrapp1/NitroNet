@@ -361,7 +361,7 @@ client.getConfig().PACKET_BUFFER_SIZE = 32000;
 ((ServerConfig)server.getConfig()).PING_SLEEP_TIME = 3000;
 ```
 
-When changing the PACKET_BUFFER_SIZE you need to make sure that both buffer sizes are the same. Technically this isn't required but will prevent future issues. For example say you set the buffer size to 5000 on the Client and 2500 on the Server. Then say you sent an object from the Client that is 3000 bytes. It will send on the client side because it is under 5000 bytes but it will not receive on the server side because it is less than 3000 bytes. So I recommend to just be safe and set them to the same value.
+When changing the PACKET_BUFFER_SIZE you need to make sure that both buffer sizes are the same. Technically this isn't required but will prevent future issues. For example say you set the buffer size to 5000 on the Client and 2500 on the Server. Then say you sent an object from the Client that is 3000 bytes. It will send on the client side because it is under 5000 bytes but it will not receive on the server side because it is greater than 2500 bytes. So I recommend to just be safe and set them to the same value.
 
 Complex Objects/Packet Streaming
 ================================
