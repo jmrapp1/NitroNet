@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-import com.jmr.wrapper.common.IConnection;
+import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.complex.ReceivedComplexPiece;
@@ -20,7 +20,9 @@ public class PacketUtils {
 		int size = findSizeOfObject(idArray);
 		if (size == 0)
 			return 0;
-		idArray = copyArray(idArray, size, 0);
+		if (idArray.length > 4) { //if array is 0010 it will think that the array should really be 001.
+			idArray = copyArray(idArray, size, 0);
+		}
 		return intfromByteArray(idArray);
 	}
 	
@@ -178,9 +180,11 @@ public class PacketUtils {
 	 * @param object The object being sent.
 	 * @return The byte array with the size of it being the byte length of the object and checksum.
 	 */
-	public static byte[] getCompressedByteArray(IProtocol protocol, ByteArrayOutputStream stream) {
-		byte[] array = stream.toByteArray();
-		
+	public static byte[] getCompressedByteArray(IProtocol protocol, ByteArrayOutputStream stream) {		
+		return getCompressedByteArray(protocol, stream.toByteArray());
+	}
+	
+	public static byte[] getCompressedByteArray(IProtocol protocol, byte[] array) {
 		byte[] checksumBytes = getChecksumOfObject(array).getBytes();
 		byte[] concat = new byte[checksumBytes.length + array.length];
 		
@@ -200,7 +204,7 @@ public class PacketUtils {
 	 * @param objectArray The array of data
 	 * @param con The connection it came from
 	 */
-	public static void handleComplexPiece(String checksumSent, byte[] objectArray, IConnection con) {
+	public static void handleComplexPiece(String checksumSent, byte[] objectArray, Connection con) {
 		int id = getIdFromComplex(objectArray);
 		int dataSize = getSizeFromComplex(objectArray);
 		if (id == 0) 
@@ -224,13 +228,20 @@ public class PacketUtils {
 	            (byte)value};
 	}
 	
+	public static int calculateSplitAmount(int dataSize, int extraDataPerPacketSize, int maxPacketSize) {
+		int initialCount = (dataSize / maxPacketSize) + 1;
+		int perPacket = dataSize / initialCount;
+		int totalDataWithExtra = initialCount * (perPacket + extraDataPerPacketSize); //gets the total data size
+		return (totalDataWithExtra / maxPacketSize) + 1;
+	}
+	
 	/** Converts a 4 byte long array to an integer.
 	 * 
 	 * @param bytes The byte array
 	 * @return The integer
 	 */
 	public static int intfromByteArray(byte[] bytes) {
-	     return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
+		return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
 	}
 	
 }

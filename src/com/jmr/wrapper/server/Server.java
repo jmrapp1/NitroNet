@@ -3,7 +3,6 @@ package com.jmr.wrapper.server;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -14,7 +13,6 @@ import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
 import com.jmr.wrapper.common.exceptions.NNCantStartServer;
-import com.jmr.wrapper.common.listener.IListener;
 import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.encryption.IEncryptor;
 import com.jmr.wrapper.server.threads.TcpAcceptThread;
@@ -87,12 +85,12 @@ public class Server implements IProtocol {
 	/** Sets the listener object.
 	 * @param listener The listener.
 	 */
-	public void setListener(IListener listener) {
+	public void setListener(SocketListener listener) {
 		this.listener = (SocketListener) listener;
 	}
 	
 	@Override
-	public IListener getListener() {
+	public SocketListener getListener() {
 		return listener;
 	}
 	

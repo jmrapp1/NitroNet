@@ -3,7 +3,6 @@ package com.jmr.wrapper.client;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -15,12 +14,10 @@ import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.complex.ComplexManager;
 import com.jmr.wrapper.common.config.Config;
-import com.jmr.wrapper.common.listener.IListener;
 import com.jmr.wrapper.common.listener.SocketListener;
 import com.jmr.wrapper.encryption.IEncryptor;
 import com.jmr.wrapper.server.ConnectionManager;
 import com.jmr.wrapper.server.threads.UdpReadThread;
-import com.jmr.wrapperx.client.HttpConnection;
 
 /**
  * Networking Library
@@ -52,7 +49,7 @@ public class Client implements IProtocol {
 	private DatagramSocket udpSocket;
 	
 	/** The listener object. */
-	private IListener listener;
+	private SocketListener listener;
 	
 	/** The connection to the server. */
 	private Connection serverConnection;
@@ -62,9 +59,6 @@ public class Client implements IProtocol {
 	
 	/** The type of encryption to use when sending and receiving packets. */
 	private IEncryptor encryptionMethod;
-
-	/** Connection to the HTTP Server if set. */
-	private HttpConnection httpConnection;
 	
 	/** Creates a new client sets the variables to be used to connect to a server later.
 	 * @param address The address to the server.
@@ -121,35 +115,15 @@ public class Client implements IProtocol {
 		}
 	}
 	
-	/** Starts a connection to a URL containing a servlet. Sends a small byte to
-	 * initiate the client's cookies. Sleeps for 2 seconds to wait for client cookies
-	 * to be set.
-	 * @param url The servlets URL.
-	 */
-	public void setHttpConnection(String url) {
-		httpConnection = new HttpConnection(this, url);
-		httpConnection.send(new String("ConnectionSetup"));
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/** @return The servlet connection. */
-	public HttpConnection getHttpConnection() {
-		return httpConnection;
-	}
-	
 	/** Sets the listener object.
 	 * @param listener The listener.
 	 */
-	public void setListener(IListener listener) {
+	public void setListener(SocketListener listener) {
 		this.listener = listener;
 	}
 	
 	@Override
-	public IListener getListener() {
+	public SocketListener getListener() {
 		return listener;
 	}
 	

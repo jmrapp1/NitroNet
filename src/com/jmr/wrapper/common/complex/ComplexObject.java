@@ -109,12 +109,6 @@ public class ComplexObject {
 			protocol.executeThread(new ComplexUdpSendThread(piece, udpOut, address, port));
 	}
 	
-	public void sendHttp(String url, String cookie, BufferedOutputStream out) {
-		for (ComplexPiece piece : pieces) {
-			piece.sendHttp(url, cookie, out);
-		}
-	}
-	
 	/** Copies part of one array to another.
 	 * @param src The array to copy.
 	 * @param sizeToCopy The amount of bytes being copied.
@@ -127,22 +121,6 @@ public class ComplexObject {
 			ret[i] = src[i + startIndex];
 		}
 		return ret;
-	}
-	
-
-	/** Gets the checksum value from an object's byte array. It converts it to a String and makes sure that the length is 10.
-	 * @param array The array to get the checksum of.
-	 * @return The checksum.
-	 */
-	private byte[] getChecksum(byte[] array) {
-		Checksum checksum = new CRC32();
-		checksum.update(array, 0, array.length);
-		String val = String.valueOf(checksum.getValue());
-		
-		while (val.length() < 10) {
-			val += "0";
-		}
-		return val.getBytes();
 	}
 	
 }

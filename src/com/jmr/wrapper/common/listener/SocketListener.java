@@ -12,7 +12,7 @@ import com.jmr.wrapper.common.Connection;
  * @version 1.0 7/19/2014
  */
 
-public interface SocketListener extends IListener {
+public interface SocketListener {
 
 	/** Called when a new packet arrives.
 	 * @param con The connection the object came from.

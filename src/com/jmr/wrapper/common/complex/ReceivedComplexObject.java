@@ -6,7 +6,7 @@ import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import com.jmr.wrapper.common.IConnection;
+import com.jmr.wrapper.common.Connection;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.utils.PacketUtils;
 
@@ -23,7 +23,7 @@ import com.jmr.wrapper.common.utils.PacketUtils;
 public class ReceivedComplexObject {
 
 	/** The connection it was sent from. */
-	private final IConnection con;
+	private final Connection con;
 	
 	/** An array of all of the received pieces. */
 	private final ReceivedComplexPiece[] pieces;
@@ -46,7 +46,7 @@ public class ReceivedComplexObject {
 	 * @param pieceSize The amount of pieces in the object.
 	 * @param protocol Instance of the protocol. 
 	 */
-	public ReceivedComplexObject(String checksum, IConnection con, int pieceSize, IProtocol protocol) {
+	public ReceivedComplexObject(String checksum, Connection con, int pieceSize, IProtocol protocol) {
 		this.checksum = checksum;
 		this.con = con;
 		this.pieceSize = pieceSize;
@@ -90,6 +90,8 @@ public class ReceivedComplexObject {
 			/** Get the checksum value of the object array. */
 			String checksumVal = PacketUtils.getChecksumOfObject(data);
 			
+			System.out.println("Final Data Size: " + data.length);
+			
 			/** Get the object from the bytes. */
 			ByteArrayInputStream in = new ByteArrayInputStream(data);
 			ObjectInputStream is = new ObjectInputStream(in);
@@ -108,7 +110,7 @@ public class ReceivedComplexObject {
 	}
 	
 	/** @return The connection the object came from. */
-	public IConnection getConnection() {
+	public Connection getConnection() {
 		return con;
 	}
 	

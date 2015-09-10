@@ -23,7 +23,7 @@ import com.jmr.wrapper.server.ConnectionManager;
  * @version 1.0 7/19/2014
  */
 
-public class Connection implements IConnection {
+public class Connection {
 
 	/** Counter used to set the id of connections. */
 	private static int counter = 0;
@@ -150,12 +150,26 @@ public class Connection implements IConnection {
 		}
 	}
 	
-	/** Sends an object over TCP by splitting it into separate packets.
+	/** Sends an object over TCP. Will automatically calculate the amount of splits needed.
 	 * @param object The object to send.
-	 * @param splitAmount The amount of splits to make
 	 */
 	public void sendComplexObjectTcp(Object object) {
-		sendComplexObjectTcp(object, 3);
+		try {
+			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
+			objOut.writeObject(object);
+			byte[] checksum = PacketUtils.getChecksumOfObject(byteOutStream.toByteArray()).getBytes();
+			byte[] data =  PacketUtils.getCompressedByteArray(protocol, byteOutStream);
+			objOut.flush();
+			objOut.close();
+			byteOutStream.close();
+			new ComplexObject(data, checksum, protocol, PacketUtils.calculateSplitAmount(data.length, checksum.length + 12, protocol.getConfig().PACKET_BUFFER_SIZE)).sendTcp(tcpOut);
+		} catch (IOException e) {
+			e.printStackTrace();
+			if (protocol.getListener() != null)
+				protocol.getListener().disconnected(this);
+			ConnectionManager.getInstance().close(this);
+		}
 	}
 	
 	/** Sends an object over TCP by splitting it into separate packets.
@@ -175,17 +189,57 @@ public class Connection implements IConnection {
 			new ComplexObject(data, checksum, protocol, splitAmount).sendTcp(tcpOut);
 		} catch (IOException e) {
 			e.printStackTrace();
-			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
-				((SocketListener)protocol.getListener()).disconnected(this);
+			if (protocol.getListener() != null)
+				protocol.getListener().disconnected(this);
 			ConnectionManager.getInstance().close(this);
 		}
 	}
 	
-	/** Sends an object over UDP by splitting it into 3 separate packets.
+	/** Sends an object over TCP by splitting it into separate packets.
+	 * @param objectData The object's byte data to send.
+	 * @param splitAmount The amount of splits to make
+	 */
+	public void sendComplexObjectTcp(byte[] objectData, int splitAmount) {
+		byte[] checksum = PacketUtils.getChecksumOfObject(objectData).getBytes();
+		byte[] data =  PacketUtils.getCompressedByteArray(protocol, objectData);
+		new ComplexObject(data, checksum, protocol, splitAmount).sendTcp(tcpOut);
+		if (protocol.getListener() != null)
+			protocol.getListener().disconnected(this);
+		ConnectionManager.getInstance().close(this);
+	}
+	
+	/** Sends an object over TCP by splitting it into separate packets. Will automatically calculate the amount of splits needed.
+	 * @param objectData The object's byte data to send.
+	 */
+	public void sendComplexObjectTcp(byte[] objectData) {
+		byte[] checksum = PacketUtils.getChecksumOfObject(objectData).getBytes();
+		byte[] data =  PacketUtils.getCompressedByteArray(protocol, objectData);
+		new ComplexObject(data, checksum, protocol, PacketUtils.calculateSplitAmount(data.length, checksum.length + 12, protocol.getConfig().PACKET_BUFFER_SIZE)).sendTcp(tcpOut);
+		if (protocol.getListener() != null)
+			protocol.getListener().disconnected(this);
+		ConnectionManager.getInstance().close(this);
+	}
+	
+	/** Sends an object over UDP. Will automatically calculate the amount of splits needed.
 	 * @param object The object to send.
 	 */
 	public void sendComplexObjectUdp(Object object) {
-		sendComplexObjectUdp(object, 3);
+		try {
+			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+			ObjectOutputStream objOut = new ObjectOutputStream(byteOutStream);
+			objOut.writeObject(object);
+			byte[] checksum = PacketUtils.getChecksumOfObject(byteOutStream.toByteArray()).getBytes();
+			byte[] data = PacketUtils.getCompressedByteArray(protocol, byteOutStream);
+			objOut.flush();
+			objOut.close();
+			byteOutStream.close();
+			new ComplexObject(data, checksum, protocol, PacketUtils.calculateSplitAmount(data.length, checksum.length + 12, protocol.getConfig().PACKET_BUFFER_SIZE)).sendUdp(udpSocket, address, port);
+		} catch (IOException e) {
+			e.printStackTrace();
+			if (protocol.getListener() != null)
+				protocol.getListener().disconnected(this);
+			ConnectionManager.getInstance().close(this);
+		}
 	}
 	
 	/** Sends an object over UDP by splitting it into separate packets.
@@ -205,10 +259,36 @@ public class Connection implements IConnection {
 			new ComplexObject(data, checksum, protocol, splitAmount).sendUdp(udpSocket, address, port);
 		} catch (IOException e) {
 			e.printStackTrace();
-			if (protocol.getListener() != null && protocol.getListener() instanceof SocketListener)
-				((SocketListener)protocol.getListener()).disconnected(this);
+			if (protocol.getListener() != null)
+				protocol.getListener().disconnected(this);
 			ConnectionManager.getInstance().close(this);
 		}
+	}
+	
+	/** Sends an object over UDP by splitting it into separate packets.
+	 * @param objectData The object's byte data to send.
+	 * @param splitAmount The amount of splits to make
+	 */
+	public void sendComplexObjectUdp(byte[] objectData, int splitAmount) {
+		byte[] checksum = PacketUtils.getChecksumOfObject(objectData).getBytes();
+		byte[] data = PacketUtils.getCompressedByteArray(protocol, objectData);
+		new ComplexObject(data, checksum, protocol, splitAmount).sendUdp(udpSocket, address, port);
+		if (protocol.getListener() != null)
+			protocol.getListener().disconnected(this);
+		ConnectionManager.getInstance().close(this);
+	}
+	
+	/** Sends an object over UDP by splitting it into separate packets. Will automatically calculate the amount of splits needed.
+	 * @param objectData The object's byte data to send.
+	 * @param splitAmount The amount of splits to make
+	 */
+	public void sendComplexObjectUdp(byte[] objectData) {
+		byte[] checksum = PacketUtils.getChecksumOfObject(objectData).getBytes();
+		byte[] data = PacketUtils.getCompressedByteArray(protocol, objectData);
+		new ComplexObject(data, checksum, protocol, PacketUtils.calculateSplitAmount(data.length, checksum.length + 12, protocol.getConfig().PACKET_BUFFER_SIZE)).sendUdp(udpSocket, address, port);
+		if (protocol.getListener() != null)
+			protocol.getListener().disconnected(this);
+		ConnectionManager.getInstance().close(this);
 	}
 
 	/** Adds one to the amount of UDP packets lost. */

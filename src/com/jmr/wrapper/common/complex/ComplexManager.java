@@ -3,7 +3,6 @@ package com.jmr.wrapper.common.complex;
 import java.util.ArrayList;
 
 import com.jmr.wrapper.common.Connection;
-import com.jmr.wrapper.common.IConnection;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.server.threads.ReceivedThread;
 
@@ -45,7 +44,7 @@ public class ComplexManager {
 	 * @param piece The new piece.
 	 * @param con The connection it came from.
 	 */
-	public void handlePiece(ReceivedComplexPiece piece, IConnection con) {
+	public void handlePiece(ReceivedComplexPiece piece, Connection con) {
 		synchronized(complexObjects) { //Synchronized because when it's UDP the ComplexObjects HashMap is edited at the same time.
 			ReceivedComplexObject obj = getComplexObject(piece, con);
 			if (obj == null) {
@@ -70,7 +69,7 @@ public class ComplexManager {
 	 * @param con The connection it came from.
 	 * @return The correct complex object.
 	 */
-	private ReceivedComplexObject getComplexObject(ReceivedComplexPiece piece, IConnection con) {
+	private ReceivedComplexObject getComplexObject(ReceivedComplexPiece piece, Connection con) {
 		for (int i = 0; i < complexObjects.size(); i++) {
 			ReceivedComplexObject o = complexObjects.get(i);
 			if (o.getConnection().equals(con) && o.getChecksum().equalsIgnoreCase(piece.getChecksum()))

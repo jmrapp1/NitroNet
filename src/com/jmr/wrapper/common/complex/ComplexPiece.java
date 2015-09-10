@@ -1,17 +1,13 @@
 package com.jmr.wrapper.common.complex;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import com.jmr.wrapper.client.Client;
 import com.jmr.wrapper.common.IProtocol;
 import com.jmr.wrapper.common.utils.PacketUtils;
-import com.jmr.wrapperx.client.HttpPostThread;
-import com.jmr.wrapperx.server.HttpSendThread;
 
 /**
  * Networking Library
@@ -80,20 +76,6 @@ public class ComplexPiece {
 		}
 	}
 	
-	/** Sends the piece over HTTP.
-	 * @param url The URL of the location of the servlet.
-	 * @param cookie The session cookie.
-	 * @param out The output stream of the response if on server side.
-	 */
-	public void sendHttp(String url, String cookie, BufferedOutputStream out) {
-		if (protocol instanceof Client && url != null) {
-			if (cookie == null)
-				protocol.executeThread(new Thread(new HttpPostThread((Client)protocol, url, data)));
-			else
-				protocol.executeThread(new Thread(new HttpPostThread((Client)protocol, url, data, cookie)));
-		}
-	}
-	
 	/** Takes the id, converts it to four bytes and adds it in front of the bytes of data. It also makes the first index in the array
 	 * equal to 99 because that is the key that will be used on the client/server side to determine whether or not it is part of a
 	 * complex object.
@@ -105,12 +87,12 @@ public class ComplexPiece {
 		copyArrayToArray(PacketUtils.intToByteArray(id), indexArray, 0); //Puts the ID into the array of 4 bytes
 		
 		byte[] pieceAmountArray = new byte[4];
-		copyArrayToArray(PacketUtils.intToByteArray(pieceAmount), pieceAmountArray, 0); //Puts the ID into the array of 4 bytes
+		copyArrayToArray(PacketUtils.intToByteArray(pieceAmount), pieceAmountArray, 0); //Puts the amount of pieces into the array of 4 bytes
 		
 		byte[] dataSizeArray = new byte[4];
-		copyArrayToArray(PacketUtils.intToByteArray(data.length), dataSizeArray, 0); //Puts the ID into the array of 4 bytes
+		copyArrayToArray(PacketUtils.intToByteArray(data.length), dataSizeArray, 0); //Puts the size of the data into the array of 4 bytes
 		
-		byte[] ret = new byte[data.length + 1 + indexArray.length + pieceAmountArray.length + dataSizeArray.length];
+		byte[] ret = new byte[data.length + 1 + indexArray.length + pieceAmountArray.length + dataSizeArray.length]; //Added 1 to set the complex object ID in the front
 		
 		ret[0] = 99; //1st Byte, Used to determine on the server/client side if the packet sent is part of a complex objects
 		copyArrayToArray(indexArray, ret, 1); //2nd byte

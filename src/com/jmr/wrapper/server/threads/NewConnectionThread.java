@@ -1,11 +1,7 @@
 package com.jmr.wrapper.server.threads;
 
 import com.jmr.wrapper.common.Connection;
-import com.jmr.wrapper.common.IConnection;
 import com.jmr.wrapper.common.listener.SocketListener;
-import com.jmr.wrapper.common.listener.IListener;
-import com.jmr.wrapperx.common.HttpListener;
-import com.jmr.wrapperx.common.HttpSession;
 
 /**
  * Networking Library
@@ -20,30 +16,24 @@ import com.jmr.wrapperx.common.HttpSession;
 public class NewConnectionThread implements Runnable {
 	
 	/** Instance of the listener object. */
-	private final IListener listener;
+	private final SocketListener listener;
 	
 	/** Instance of the connection. */
-	private final IConnection con;
-	
-	private final HttpSession httpSession;
+	private final Connection con;
 	
 	/** Creates a new thread to call the new connection event.
 	 * @param listener Instance of the listener object.
 	 * @param con Instance of the connection.
 	 */
-	public NewConnectionThread(IListener listener, IConnection con) {
+	public NewConnectionThread(SocketListener listener, Connection con) {
 		this.listener = listener;
 		this.con = con;
-		httpSession = null;
 	}
 	
 	@Override
 	public void run() {
 		if (listener != null) {
-			if (listener instanceof SocketListener)
-				((SocketListener)listener).connected((Connection)con);
-			else if (listener instanceof HttpListener)
-				((HttpListener)listener).connected((HttpSession)con);
+			listener.connected(con);
 		}
 	}
 
